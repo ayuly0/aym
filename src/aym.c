@@ -2,25 +2,60 @@
 
 char *err_as_cstr( Err err )
 {
-    char *err_str;
     switch ( err )
     {
-    case ERR_STACK_OVERFLOW     : err_str = "STACK_OVERFLOW"; break;
-    case ERR_STACK_UNDERFLOW    : err_str = "STACK_UNDERFLOW"; break;
-    case ERR_ILLEGAL_INST_ACCESS: err_str = "ERR_ILLEGAL_INST_ACCESS"; break;
-    case ERR_ILLEGAL_INST       : err_str = "ERR_ILLEGAL_INST"; break;
-    case ERR_UNKOWN_SYSCALL     : err_str = "ERR_UNKOWN_SYSCALL"; break;
-    default                     : err_str = "UNKOWN_ERR"; break;
+    case ERR_STACK_OVERFLOW     : return "STACK_OVERFLOW";
+    case ERR_STACK_UNDERFLOW    : return "STACK_UNDERFLOW";
+    case ERR_ILLEGAL_INST_ACCESS: return "ERR_ILLEGAL_INST_ACCESS";
+    case ERR_ILLEGAL_INST       : return "ERR_ILLEGAL_INST";
+    case ERR_DIV_BY_ZERO        : return "ERR_DIV_BY_ZERO";
+    case ERR_UNKOWN_SYSCALL     : return "ERR_UNKOWN_SYSCALL";
+    default                     : return "UNKOWN_ERR";
     }
-    return err_str;
+}
+
+char *inst_as_cstr( InstType inst_type, int inst_opcode )
+{
+    if ( inst_type == INST_STACK )
+    {
+        switch ( inst_opcode )
+        {
+        case INST_STACK_NOP    : return "INST_STACK_NOP";
+        case INST_STACK_PUSH   : return "INST_STACK_PUSH";
+        case INST_STACK_POP    : return "INST_STACK_POP";
+        case INST_STACK_SWAP   : return "INST_STACK_SWAP";
+        case INST_STACK_PLUS   : return "INST_STACK_PLUS";
+        case INST_STACK_SUB    : return "INST_STACK_SUB";
+        case INST_STACK_DIV    : return "INST_STACK_DIV";
+        case INST_STACK_MUL    : return "INST_STACK_MUL";
+        case INST_STACK_SYSCALL: return "INST_STACK_SYSCALL";
+        case INST_STACK_HALT   : return "INST_STACK_HALT";
+        default                : return "UNKOWN_INST_STACK";
+        }
+    }
+
+    // INST_REGISTER
+    switch ( inst_opcode )
+    {
+
+    default: return "UNKOWN_INST_REG";
+    }
 }
 
 void aym_init( AYM *vm )
 {
-    vm->stack_size   = 0;
-    vm->program_size = 0;
-    vm->ip           = 0;
-    vm->halt         = false;
+    vm->registers[ REG_0 ].as_u64     = 0;
+    vm->registers[ REG_1 ].as_u64     = 0;
+    vm->registers[ REG_2 ].as_u64     = 0;
+    vm->registers[ REG_3 ].as_u64     = 0;
+    vm->registers[ REG_4 ].as_u64     = 0;
+    vm->registers[ REG_5 ].as_u64     = 0;
+    vm->registers[ REG_BP ].as_u64    = 0;
+    vm->registers[ REG_ESP ].as_u64   = 0;
+    vm->registers[ REG_IP ].as_u64    = 0;
+    vm->registers[ REG_FLAGS ].as_u64 = 0;
+    vm->program_size                  = 0;
+    vm->halt                          = false;
 
     memset( vm->stack, 0, AYM_STACK_SIZE );
     memset( vm->program, 0, AYM_PROGRAM_SIZE );
@@ -28,44 +63,148 @@ void aym_init( AYM *vm )
 
 Err aym_execute_inst( AYM *vm )
 {
-    if ( vm->ip >= vm->program_size )
+    if ( vm->registers[ REG_IP ].as_u64 >= vm->program_size )
     {
         return ERR_ILLEGAL_INST_ACCESS;
     }
 
-    Inst inst = vm->program[ vm->ip ];
+    Inst inst = vm->program[ vm->registers[ REG_IP ].as_u64 ];
 
-    switch ( inst.type )
+    if ( inst.type == INST_STACK )
     {
-    case INST_NOP: vm->ip++; break;
-    case INST_PUSH:
-        if ( vm->stack_size >= AYM_STACK_SIZE )
+        switch ( inst.opcode )
         {
-            return ERR_STACK_OVERFLOW;
+        case INST_STACK_NOP: vm->registers[ REG_IP ].as_u64++; break;
+
+        case INST_STACK_PUSH:
+            if ( vm->registers[ REG_ESP ].as_u64 >= AYM_STACK_SIZE )
+            {
+                return ERR_STACK_OVERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = inst.src.imm;
+            vm->registers[ REG_IP ].as_u64++;
+            break;
+
+        case INST_STACK_POP:
+            if ( vm->registers[ REG_ESP ].as_u64 <= 0 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->registers[ REG_ESP ].as_u64--;
+            vm->registers[ REG_IP ].as_u64++;
+            break;
+
+        case INST_STACK_SWAP:
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            i64 temp                                         = vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ] = vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ];
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 = temp;
+            break;
+
+        case INST_STACK_PLUS:
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64 +
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+            vm->registers[ REG_IP ].as_u64++;
+            break;
+
+        case INST_STACK_SUB:
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 -
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+            vm->registers[ REG_IP ].as_u64++;
+            break;
+
+        case INST_STACK_DIV:
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            if ( vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64 == 0 )
+            {
+                return ERR_DIV_BY_ZERO;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 /
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+            vm->registers[ REG_IP ].as_u64++;
+            break;
+
+        case INST_STACK_MUL:
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 *
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+            vm->registers[ REG_IP ].as_u64++;
+            break;
+
+        case INST_STACK_SYSCALL:
+            if ( invoke_syscall( vm ) != ERR_OK )
+            {
+                return ERR_UNKOWN_SYSCALL;
+            }
+            vm->registers[ REG_IP ].as_u64++;
+            break;
+        case INST_STACK_HALT:
+            printf( "Exiting..\n" );
+            vm->halt = true;
+            break;
+        default:
+            printf(
+                "ILLEGAL INST: %s, TYPE: %d, OPCODE: %d\n", inst_as_cstr( inst.type, inst.opcode ), inst.type,
+                inst.opcode
+            );
+            return ERR_ILLEGAL_INST;
+        }
+    }
+    else
+    {
+        // INST_REGISTER
+        switch ( inst.opcode )
+        {
+        case INST_REG_MOV: {
+            Word value;
+            if ( inst.src.type == OPERAND_REGISTER )
+            {
+                value = vm->registers[ inst.src.reg ];
+            }
+            else if ( inst.src.type == OPERAND_IMMEDIATE )
+            {
+                value = inst.src.imm;
+            }
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                vm->registers[ inst.dst.reg ] = value;
+            }
+            vm->registers[ REG_IP ].as_u64++;
+            break;
         }
 
-        vm->stack[ vm->stack_size++ ] = inst.operand;
-        vm->ip++;
-        break;
-    case INST_PLUS:
-        if ( vm->stack_size < 2 )
-        {
-            return ERR_STACK_UNDERFLOW;
+        default:
+            printf(
+                "ILLEGAL INST: %s, TYPE: %d, OPCODE: %d\n", inst_as_cstr( inst.type, inst.opcode ), inst.type,
+                inst.opcode
+            );
+            return ERR_ILLEGAL_INST;
         }
-        vm->stack[ vm->stack_size - 2 ].as_i64 =
-            vm->stack[ vm->stack_size - 1 ].as_i64 + vm->stack[ vm->stack_size - 2 ].as_i64;
-        vm->stack_size--;
-        vm->ip++;
-        break;
-    case INST_SYSCALL:
-        if ( handle_syscall( vm ) != ERR_OK )
-        {
-            return ERR_UNKOWN_SYSCALL;
-        }
-        vm->ip++;
-        break;
-    case INST_HALT: vm->halt = true; break;
-    default       : printf( "INST: %d\n", inst.type ); return ERR_ILLEGAL_INST;
     }
 
     return ERR_OK;
@@ -75,6 +214,7 @@ Err aym_execute_program( AYM *vm )
 {
     while ( !vm->halt )
     {
+        aym_dump_register( stdout, vm );
         aym_dump_stack( stdout, vm );
         Err err = aym_execute_inst( vm );
         if ( err != ERR_OK )
@@ -89,9 +229,9 @@ Err aym_execute_program( AYM *vm )
 void aym_dump_stack( FILE *stream, AYM *vm )
 {
     fprintf( stream, "Stack:\n" );
-    if ( vm->stack_size > 0 )
+    if ( vm->registers[ REG_ESP ].as_u64 > 0 )
     {
-        for ( u64 i = 0; i < vm->stack_size; ++i )
+        for ( u64 i = 0; i < vm->registers[ REG_ESP ].as_u64; ++i )
         {
             fprintf(
                 stream, "  u64: %" PRIu64 ", i64: %" PRId64 ", f64: %lf, ptr: %p\n", vm->stack[ i ].as_u64,
@@ -105,21 +245,34 @@ void aym_dump_stack( FILE *stream, AYM *vm )
     }
 }
 
-Err handle_syscall( AYM *vm )
+void aym_dump_register( FILE *stream, AYM *vm )
 {
-    VmSyscall syscall_code = vm->stack[ --vm->stack_size ].as_u64;
+    fprintf( stream, "Registers:\n" );
+    fprintf(
+        stream,
+        "  Reg0: %p, Reg1: %p, Reg2: %p\n  Reg3: %p, Reg4: %p, Reg5: %p\n  Bp  : %p, Esp : %p, Ip  : %p\n  Flags: %p\n",
+        vm->registers[ REG_0 ].as_ptr, vm->registers[ REG_1 ].as_ptr, vm->registers[ REG_2 ].as_ptr,
+        vm->registers[ REG_3 ].as_ptr, vm->registers[ REG_4 ].as_ptr, vm->registers[ REG_5 ].as_ptr,
+        vm->registers[ REG_BP ].as_ptr, vm->registers[ REG_ESP ].as_ptr, vm->registers[ REG_IP ].as_ptr,
+        vm->registers[ REG_FLAGS ].as_ptr
+    );
+}
+
+Err invoke_syscall( AYM *vm )
+{
+    VmSyscall syscall_code = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
     switch ( syscall_code )
     {
     case SYSCALL_EXIT: {
-        u64 code = vm->stack[ --vm->stack_size ].as_u64;
+        u64 code = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
         printf( "VM exiting wth code %llu", code );
         vm->halt = true;
         break;
     }
     case SYSCALL_WRITE: {
-        u64 len     = vm->stack[ --vm->stack_size ].as_u64;
-        u64 buf_val = vm->stack[ --vm->stack_size ].as_u64;
-        u64 fd      = vm->stack[ --vm->stack_size ].as_u64;
+        u64 len     = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
+        u64 buf_val = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
+        u64 fd      = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
         void *buf   = ( void * )( uintptr_t )buf_val;
         write( fd, buf, len );
         break;

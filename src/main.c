@@ -1,13 +1,22 @@
 #include "aym.h"
 
-#define MAKE_INST_PUSH( value ) { .type = INST_PUSH, .operand = value }
-#define MAKE_INST_PLUS          { .type = INST_PLUS }
-#define MAKE_INST_SYSCALL       { .type = INST_SYSCALL }
-#define MAKE_INST_HALT          { .type = INST_HALT }
+#define MAKE_INST_PUSH( value ) { .type = INST_STACK, .opcode = INST_STACK_PUSH, .src = value }
+#define MAKE_INST_PLUS          { .type = INST_STACK, .opcode = INST_STACK_PLUS }
+#define MAKE_INST_SYSCALL       { .type = INST_STACK, .opcode = INST_STACK_SYSCALL }
+#define MAKE_INST_HALT          { .type = INST_STACK, .opcode = INST_STACK_HALT }
+#define MAKE_INST_MOV_REG_VAL( reg_, val_ )                                                                            \
+    ( Inst )                                                                                                           \
+    {                                                                                                                  \
+        .type = INST_REG, .opcode = INST_REG_MOV, .dst = { .type = OPERAND_REGISTER, .reg = ( reg_ ) }, .src = {       \
+            .type = OPERAND_IMMEDIATE,                                                                                 \
+            .imm  = ( val_ )                                                                                           \
+        }                                                                                                              \
+    }
 
 int main()
 {
-    static AYM vm = { .stack_size = 0, .program_size = 0, .ip = 0, .halt = false };
+    static AYM vm = {};
+    aym_init( &vm );
 
     char *str = "HELLO WORD\n";
     Inst pg[] = {
@@ -17,8 +26,9 @@ int main()
         MAKE_INST_PUSH( 1 ),
         MAKE_INST_PUSH( ( u64 )( uintptr_t )str ),
         MAKE_INST_PUSH( 11 ),
-        MAKE_INST_PUSH( SYSCALL_WRITE ),
-        MAKE_INST_SYSCALL,
+        MAKE_INST_PUSH( ( int )SYSCALL_WRITE ),
+        /*MAKE_INST_SYSCALL,*/
+        MAKE_INST_MOV_REG_VAL( REG_0, 69 ),
         MAKE_INST_HALT,
     };
     vm.program_size = sizeof( pg ) / sizeof( pg[ 0 ] );
