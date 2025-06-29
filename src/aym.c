@@ -18,14 +18,38 @@ char *inst_as_cstr( InstType inst_type )
 {
     switch ( inst_type )
     {
-    case INST_NOP    : return "INST_NOP";
-    case INST_PUSH   : return "INST_PUSH";
-    case INST_POP    : return "INST_POP";
-    case INST_SWAP   : return "INST_SWAP";
-    case INST_PLUS   : return "INST_PLUS";
-    case INST_SUB    : return "INST_SUB";
-    case INST_DIV    : return "INST_DIV";
-    case INST_MUL    : return "INST_MUL";
+    case INST_NOP      : return "INST_NOP";
+    case INST_PUSH     : return "INST_PUSH";
+    case INST_POP_STACK: return "INST_POP_STACK";
+    case INST_SWAP     : return "INST_SWAP";
+    case INST_PLUS     : return "INST_PLUS";
+    case INST_SUB_STACK: return "INST_SUB_STACK";
+    case INST_DIV_STACK: return "INST_DIV_STACK";
+    case INST_MUL_STACK: return "INST_MUL_STACK";
+    case INST_DUP      : return "INST_DUP";
+
+    case INST_MOV    : return "INST_MOV";
+    case INST_ADD    : return "INST_ADD";
+    case INST_SUB_REG: return "INST_SUB_REG";
+    case INST_DIV_REG: return "INST_DIV_REG";
+    case INST_MUL_REG: return "INST_MUL_REG";
+    case INST_POP_REG: return "INST_POP_REG";
+    case INST_XOR    : return "INST_XOR";
+    case INST_AND    : return "INST_AND";
+    case INST_NOT    : return "INST_NOT";
+    case INST_OR     : return "INST_OR";
+    case INST_LEA    : return "INST_LEA";
+    case INST_CMP    : return "INST_CMP";
+    case INST_TEST   : return "INST_TEST";
+    case INST_LOAD   : return "INST_LOAD";
+    case INST_STORE  : return "INST_STORE";
+
+    case INST_JMP : return "INST_JMP";
+    case INST_JZ  : return "INST_JZ";
+    case INST_JNZ : return "INST_JNZ";
+    case INST_CALL: return "INST_CALL";
+    case INST_RET : return "INST_RET";
+
     case INST_SYSCALL: return "INST_SYSCALL";
     case INST_HALT   : return "INST_HALT";
     default          : return "UNKOWN_INST";
@@ -62,7 +86,7 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_POP:
+    case INST_POP_STACK:
         if ( vm->registers[ REG_ESP ].as_u64 <= 0 )
         {
             return ERR_STACK_UNDERFLOW;
@@ -94,7 +118,7 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_SUB:
+    case INST_SUB_STACK:
         if ( vm->registers[ REG_ESP ].as_u64 < 2 )
         {
             return ERR_STACK_UNDERFLOW;
@@ -106,7 +130,7 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_DIV:
+    case INST_DIV_STACK:
         if ( vm->registers[ REG_ESP ].as_u64 < 2 )
         {
             return ERR_STACK_UNDERFLOW;
@@ -122,7 +146,7 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_MUL:
+    case INST_MUL_STACK:
         if ( vm->registers[ REG_ESP ].as_u64 < 2 )
         {
             return ERR_STACK_UNDERFLOW;
