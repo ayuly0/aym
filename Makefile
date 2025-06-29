@@ -26,5 +26,8 @@ $(BUILD)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+run:
+	./$(OUT)
+
 clean:
 	rm -rf $(BUILD)

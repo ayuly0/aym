@@ -1,6 +1,7 @@
 #ifndef AYM_H
 #define AYM_H
 
+#include <capstone/capstone.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,6 +12,13 @@
 
 #define AYM_STACK_SIZE   1024 * 1024 // 1MB
 #define AYM_PROGRAM_SIZE 1024 * 1024 // 1MB
+
+// vm->regs[flags] |= FLAG_ZERO;   -> set zero flag
+// vm->regs[flags] &= ~FLAG_ZERO;  -> clear zero flag
+#define FLAG_ZERO  ( 1 << 0 )
+#define FLAG_SIGN  ( 1 << 1 )
+#define FLAG_CARRY ( 1 << 2 )
+#define FLAG_OVER  ( 1 << 3 )
 
 typedef enum
 {
@@ -31,27 +39,40 @@ typedef enum
 
 typedef enum
 {
-    INST_STACK_NOP = 0,
-    INST_STACK_PUSH,
-    INST_STACK_POP,
-    INST_STACK_SWAP,
-    INST_STACK_PLUS,
-    INST_STACK_SUB,
-    INST_STACK_DIV,
-    INST_STACK_MUL,
-    INST_STACK_SYSCALL,
-    INST_STACK_HALT,
-} InstStackType;
+    INST_NOP = 0,
+    INST_PUSH,
+    INST_POP_STACK,
+    INST_SWAP,
+    INST_PLUS,
+    INST_SUB_STACK,
+    INST_DIV_STACK,
+    INST_MUL_STACK,
+    INST_DUP, // [ ]
 
-typedef enum
-{
-    INST_REG_MOV = 0,
-} InstRegisterType;
+    INST_MOV,
+    INST_ADD,
+    INST_SUB_REG, // [ ]
+    INST_DIV_REG, // [ ]
+    INST_MUL_REG, // [ ]
+    INST_POP_REG, // [ ]
+    INST_XOR,     // [ ]
+    INST_AND,     // [ ]
+    INST_NOT,     // [ ]
+    INST_OR,      // [ ]
+    INST_LEA,     // [ ]
+    INST_CMP,
+    INST_TEST,  // [ ]
+    INST_LOAD,  // [ ]
+    INST_STORE, // [ ]
 
-typedef enum
-{
-    INST_STACK = 0,
-    INST_REG
+    INST_JMP,
+    INST_JZ,
+    INST_JNZ,
+    INST_CALL, // [ ]
+    INST_RET,  // [ ]
+
+    INST_SYSCALL,
+    INST_HALT,
 } InstType;
 
 typedef enum
@@ -88,7 +109,6 @@ typedef struct
 typedef struct
 {
     InstType type;
-    int opcode;
     Operand src;
     Operand dst;
 } Inst;
@@ -107,13 +127,15 @@ typedef struct AYM_t
 
 char *err_as_cstr( Err err );
 
-char *inst_as_cstr( InstType inst_type, int inst_opcode );
+char *inst_as_cstr( InstType inst_type );
 
-void aym_init( AYM *aym );
+void aym_init( AYM *vm );
 
-Err aym_execute_inst( AYM *aym );
+Err aym_execute_inst( AYM *vm );
 
-Err aym_execute_program( AYM *aym );
+Err aym_execute_program( AYM *vm );
+
+Word aym_get_operand_value( AYM *vm, Operand operand );
 
 void aym_dump_stack( FILE *stream, AYM *vm );
 
