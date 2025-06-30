@@ -1,7 +1,6 @@
 #ifndef AYM_H
 #define AYM_H
 
-#include <capstone/capstone.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
