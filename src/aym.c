@@ -199,11 +199,50 @@ Err aym_execute_inst( AYM *vm )
         break;
 
     case INST_SUB_REG:
+
     case INST_DIV_REG:
+
     case INST_MUL_REG:
-    case INST_XOR:
-    case INST_AND:
-    case INST_TEST:
+
+    case INST_XOR: {
+        Word a = aym_reslove_operand( vm, inst.dst );
+        Word b = aym_reslove_operand( vm, inst.src );
+
+        vm->registers[ inst.dst.reg ].as_u64 = a.as_u64 ^ b.as_u64;
+        vm->registers[ REG_FLAGS ].as_u64    = ( vm->registers[ inst.dst.reg ].as_u64 == 0 );
+        break;
+    }
+
+    case INST_AND: {
+        Word a = aym_reslove_operand( vm, inst.dst );
+        Word b = aym_reslove_operand( vm, inst.src );
+
+        vm->registers[ inst.dst.reg ].as_u64 = a.as_u64 && b.as_u64;
+        vm->registers[ REG_FLAGS ].as_u64    = ( vm->registers[ inst.dst.reg ].as_u64 == 0 );
+        break;
+    }
+
+    case INST_OR: {
+        Word a = aym_reslove_operand( vm, inst.dst );
+        Word b = aym_reslove_operand( vm, inst.src );
+
+        vm->registers[ inst.dst.reg ].as_u64 = a.as_u64 || b.as_u64;
+        vm->registers[ REG_FLAGS ].as_u64    = ( vm->registers[ inst.dst.reg ].as_u64 == 0 );
+        break;
+    }
+
+    case INST_NOT: {
+        Word a                               = aym_reslove_operand( vm, inst.src );
+        vm->registers[ inst.dst.reg ].as_u64 = ~a.as_u64;
+        vm->registers[ REG_FLAGS ].as_u64    = ( vm->registers[ inst.dst.reg ].as_u64 == 0 );
+        break;
+    }
+
+    case INST_LEA: {
+        Word addr                     = aym_reslove_operand( vm, inst.src );
+        vm->registers[ inst.dst.reg ] = addr;
+        break;
+    }
 
     case INST_CMP: {
         Word r;
@@ -219,6 +258,27 @@ Err aym_execute_inst( AYM *vm )
             vm->registers[ REG_FLAGS ].as_u64 |= FLAG_SIGN;
         }
         vm->registers[ REG_IP ].as_u64++;
+        break;
+    }
+
+    case INST_TEST: {
+        Word a = aym_reslove_operand( vm, inst.dst );
+        Word b = aym_reslove_operand( vm, inst.src );
+        Word res;
+
+        res.as_u64                        = a.as_u64 & b.as_u64;
+        vm->registers[ REG_FLAGS ].as_u64 = ( res.as_u64 == 0 );
+        break;
+    }
+    case INST_LOAD: {
+        Word addr                     = aym_reslove_operand( vm, inst.src );
+        vm->registers[ inst.dst.reg ] = vm->memory[ addr.as_u64 ];
+        break;
+    }
+    case INST_STORE: {
+        Word addr                 = aym_reslove_operand( vm, inst.dst );
+        Word value                = aym_reslove_operand( vm, inst.src );
+        vm->memory[ addr.as_u64 ] = value;
         break;
     }
 
@@ -243,8 +303,31 @@ Err aym_execute_inst( AYM *vm )
         }
         vm->registers[ REG_IP ].as_u64++;
         break;
+
     case INST_CALL:
+        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_STACK_SIZE )
+        {
+            return ERR_STACK_OVERFLOW;
+        }
+        // push old BP to the Stack and set BP to ESP
+        vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = vm->registers[ REG_BP ];
+        vm->registers[ REG_BP ].as_u64                 = vm->registers[ REG_ESP ].as_u64 - 1;
+
+        vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = vm->registers[ REG_IP ];
+        vm->registers[ REG_IP ]                        = aym_reslove_operand( vm, inst.dst );
+        break;
+
     case INST_RET:
+        if ( vm->registers[ REG_ESP ].as_u64 < 1 )
+        {
+            return ERR_STACK_UNDERFLOW;
+        }
+        vm->registers[ REG_IP ].as_u64 = vm->stack[ vm->registers[ REG_BP ].as_u64 + 1 ].as_u64 + 1;
+        vm->registers[ REG_BP ]        = vm->stack[ vm->registers[ REG_BP ].as_u64 ];
+        // deallocating local varible
+        vm->registers[ REG_ESP ]       = vm->registers[ REG_BP ];
+
+        break;
 
     case INST_SYSCALL:
         if ( invoke_syscall( vm ) != ERR_OK )
@@ -266,8 +349,8 @@ Err aym_execute_program( AYM *vm )
 {
     while ( !vm->halt )
     {
-        /*aym_dump_register( stdout, vm );*/
-        /*aym_dump_stack( stdout, vm );*/
+        aym_dump_register( stdout, vm );
+        aym_dump_stack( stdout, vm );
         Err err = aym_execute_inst( vm );
         if ( err != ERR_OK )
         {

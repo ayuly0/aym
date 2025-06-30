@@ -55,21 +55,21 @@ typedef enum
     INST_DIV_REG, // [ ]
     INST_MUL_REG, // [ ]
     INST_POP_REG, // [ ]
-    INST_XOR,     // [ ]
-    INST_AND,     // [ ]
-    INST_NOT,     // [ ]
-    INST_OR,      // [ ]
-    INST_LEA,     // [ ]
+    INST_XOR,
+    INST_AND,
+    INST_NOT,
+    INST_OR,
+    INST_LEA,
     INST_CMP,
-    INST_TEST,  // [ ]
-    INST_LOAD,  // [ ]
-    INST_STORE, // [ ]
+    INST_TEST,
+    INST_LOAD,
+    INST_STORE,
 
     INST_JMP,
     INST_JZ,
     INST_JNZ,
-    INST_CALL, // [ ]
-    INST_RET,  // [ ]
+    INST_CALL,
+    INST_RET,
 
     INST_SYSCALL,
     INST_HALT,
@@ -83,8 +83,8 @@ typedef enum
     REG_3,
     REG_4,
     REG_5,
-    REG_BP,  // -> base_func_addr
-    REG_ESP, // -> stack_size
+    REG_BP,
+    REG_ESP,
     REG_IP,
     REG_FLAGS
 } RegisterType;
@@ -100,9 +100,9 @@ typedef struct
 {
     OperandType type;
     union {
-        int reg;      // REGISTER
-        Word imm;     // IMMEDIATE
-        int mem_addr; // MEMORY
+        int reg;
+        Word imm;
+        int mem_addr;
     };
 } Operand;
 
