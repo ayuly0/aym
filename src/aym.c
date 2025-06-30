@@ -336,11 +336,8 @@ Err aym_execute_inst( AYM *vm )
         }
         vm->registers[ REG_IP ].as_u64++;
         break;
-    case INST_HALT:
-        printf( "Exiting..\n" );
-        vm->halt = true;
-        break;
-    default: printf( "ILLEGAL INST: %s, TYPE: %d\n", inst_as_cstr( inst.type ), inst.type ); return ERR_ILLEGAL_INST;
+    case INST_HALT: vm->halt = true; break;
+    default       : printf( "ILLEGAL INST: %s, TYPE: %d\n", inst_as_cstr( inst.type ), inst.type ); return ERR_ILLEGAL_INST;
     }
     return ERR_OK;
 }
