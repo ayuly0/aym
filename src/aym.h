@@ -12,6 +12,7 @@
 
 #define AYM_STACK_SIZE   1024 * 1024 // 1MB
 #define AYM_PROGRAM_SIZE 1024 * 1024 // 1MB
+#define AYM_MEMORY_SIZE  1024 * 1024 // 1MB
 
 // vm->regs[flags] |= FLAG_ZERO;   -> set zero flag
 // vm->regs[flags] &= ~FLAG_ZERO;  -> clear zero flag
@@ -47,7 +48,7 @@ typedef enum
     INST_SUB_STACK,
     INST_DIV_STACK,
     INST_MUL_STACK,
-    INST_DUP, // [ ]
+    INST_DUP,
 
     INST_MOV,
     INST_ADD,
@@ -121,6 +122,7 @@ typedef struct AYM_t
     u64 program_size;
 
     Word registers[ 10 ];
+    Word memory[ AYM_MEMORY_SIZE ];
 
     bool halt;
 } AYM;
@@ -135,7 +137,7 @@ Err aym_execute_inst( AYM *vm );
 
 Err aym_execute_program( AYM *vm );
 
-Word aym_get_operand_value( AYM *vm, Operand operand );
+Word aym_reslove_operand( AYM *vm, Operand operand );
 
 void aym_dump_stack( FILE *stream, AYM *vm );
 

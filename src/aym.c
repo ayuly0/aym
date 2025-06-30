@@ -61,6 +61,7 @@ void aym_init( AYM *vm )
     vm->halt = false;
 
     memset( vm->stack, 0, AYM_STACK_SIZE );
+    memset( vm->memory, 0, AYM_MEMORY_SIZE );
     memset( vm->program, 0, AYM_PROGRAM_SIZE );
 }
 
@@ -159,12 +160,26 @@ Err aym_execute_inst( AYM *vm )
         break;
 
     case INST_DUP:
+        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_STACK_SIZE )
+        {
+            return ERR_STACK_OVERFLOW;
+        }
+        u64 addr_dup = aym_reslove_operand( vm, inst.dst ).as_u64;
+        if ( vm->registers[ REG_ESP ].as_u64 - addr_dup <= 0 )
+        {
+            return ERR_STACK_UNDERFLOW;
+        }
+        vm->stack[ vm->registers[ REG_ESP ].as_u64 ] = vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 - addr_dup ];
+
+        vm->registers[ REG_ESP ].as_u64++;
+        vm->registers[ REG_IP ].as_u64++;
+        break;
 
         // Registers Inst
     case INST_MOV:
         if ( inst.dst.type == OPERAND_REGISTER )
         {
-            vm->registers[ inst.dst.reg ] = aym_get_operand_value( vm, inst.src );
+            vm->registers[ inst.dst.reg ] = aym_reslove_operand( vm, inst.src );
         }
         else
         {
@@ -178,7 +193,7 @@ Err aym_execute_inst( AYM *vm )
     case INST_ADD:
         if ( inst.dst.type == OPERAND_REGISTER )
         {
-            vm->registers[ inst.dst.reg ].as_i64 += aym_get_operand_value( vm, inst.src ).as_i64;
+            vm->registers[ inst.dst.reg ].as_i64 += aym_reslove_operand( vm, inst.src ).as_i64;
         }
         vm->registers[ REG_IP ].as_u64++;
         break;
@@ -192,7 +207,7 @@ Err aym_execute_inst( AYM *vm )
 
     case INST_CMP: {
         Word r;
-        r.as_i64 = aym_get_operand_value( vm, inst.src ).as_i64 - aym_get_operand_value( vm, inst.dst ).as_i64;
+        r.as_i64 = aym_reslove_operand( vm, inst.src ).as_i64 - aym_reslove_operand( vm, inst.dst ).as_i64;
 
         vm->registers[ REG_FLAGS ].as_u64 = 0;
         if ( r.as_i64 == 0 )
@@ -208,12 +223,12 @@ Err aym_execute_inst( AYM *vm )
     }
 
     // Control Flow
-    case INST_JMP: vm->registers[ REG_IP ] = inst.dst.imm; break;
+    case INST_JMP: vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst ); break;
     case INST_JNZ:
         if ( !( vm->registers[ REG_FLAGS ].as_u64 & FLAG_ZERO ) )
         {
-            Word ipToJmp            = aym_get_operand_value( vm, inst.dst );
-            vm->registers[ REG_IP ] = ipToJmp;
+            Word ip_to_jmp          = aym_reslove_operand( vm, inst.dst );
+            vm->registers[ REG_IP ] = ip_to_jmp;
             break;
         }
         vm->registers[ REG_IP ].as_u64++;
@@ -222,8 +237,8 @@ Err aym_execute_inst( AYM *vm )
     case INST_JZ:
         if ( vm->registers[ REG_FLAGS ].as_u64 & FLAG_ZERO )
         {
-            Word ipToJmp            = aym_get_operand_value( vm, inst.dst );
-            vm->registers[ REG_IP ] = ipToJmp;
+            Word ip_to_jmp          = aym_reslove_operand( vm, inst.dst );
+            vm->registers[ REG_IP ] = ip_to_jmp;
             break;
         }
         vm->registers[ REG_IP ].as_u64++;
@@ -251,8 +266,8 @@ Err aym_execute_program( AYM *vm )
 {
     while ( !vm->halt )
     {
-        aym_dump_register( stdout, vm );
-        aym_dump_stack( stdout, vm );
+        /*aym_dump_register( stdout, vm );*/
+        /*aym_dump_stack( stdout, vm );*/
         Err err = aym_execute_inst( vm );
         if ( err != ERR_OK )
         {
@@ -263,7 +278,7 @@ Err aym_execute_program( AYM *vm )
     return ERR_OK;
 }
 
-Word aym_get_operand_value( AYM *vm, Operand operand )
+Word aym_reslove_operand( AYM *vm, Operand operand )
 {
     if ( operand.type == OPERAND_IMMEDIATE )
     {
@@ -272,6 +287,10 @@ Word aym_get_operand_value( AYM *vm, Operand operand )
     else if ( operand.type == OPERAND_REGISTER )
     {
         return vm->registers[ operand.reg ];
+    }
+    else
+    {
+        return *( Word * )( vm->memory + operand.mem_addr );
     }
 }
 

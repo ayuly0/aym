@@ -19,17 +19,35 @@
         }                                                                                                              \
     }
 
-int main()
+int main( int argc, char **argv )
 {
     static AYM vm = {};
     aym_init( &vm );
 
+    char *str = "HELLO WORD\n";
     Inst pg[] = {
-        MAKE_INST_MOV_REG_VAL( REG_0, 69 ),
-        MAKE_INST_MOV_REG_VAL( REG_1, 0 ),
-        ( Inst ){ INST_ADD, { OPERAND_IMMEDIATE, .imm = 1 }, { OPERAND_REGISTER, .reg = REG_1 } },
-        ( Inst ){ INST_CMP, { OPERAND_REGISTER, .reg = REG_0 }, { OPERAND_REGISTER, .reg = REG_1 } },
-        ( Inst ){ INST_JNZ, .dst = { OPERAND_IMMEDIATE, .imm = 2 } },
+        /*
+         * 0x0: mov r0, 1
+         * 0x1: push 1
+         * 0x2: push [str]
+         * 0x3: push 11
+         * 0x4: push SYSCALL_WRITE
+         * 0x5: syscall
+         * 0x6: add r0, 1
+         * 0x7: cmp r0, 5
+         * 0x8: jnz 0x1
+         * 0x9: halt
+         */
+
+        MAKE_INST_MOV_REG_VAL( REG_0, 0 ),
+        MAKE_INST_PUSH( 1 ),
+        MAKE_INST_PUSH( ( u64 )( uintptr_t )str ),
+        MAKE_INST_PUSH( 11 ),
+        MAKE_INST_PUSH( SYSCALL_WRITE ),
+        MAKE_INST_SYSCALL,
+        ( Inst ){ INST_ADD, .dst = { OPERAND_REGISTER, .reg = REG_0 }, .src = { OPERAND_IMMEDIATE, .imm = 1 } },
+        ( Inst ){ INST_CMP, { OPERAND_REGISTER, .reg = REG_0 }, { OPERAND_IMMEDIATE, .imm = 5 } },
+        ( Inst ){ INST_JNZ, .dst = { OPERAND_IMMEDIATE, .imm = 1 } },
         MAKE_INST_HALT,
     };
     vm.program_size = sizeof( pg ) / sizeof( pg[ 0 ] );
