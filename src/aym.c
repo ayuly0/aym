@@ -83,7 +83,7 @@ Err aym_execute_inst( AYM *vm )
         {
             return ERR_STACK_OVERFLOW;
         }
-        vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = inst.dst.imm;
+        vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = aym_reslove_operand( vm, inst.dst );
         vm->registers[ REG_IP ].as_u64++;
         break;
 
