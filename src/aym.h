@@ -54,7 +54,7 @@ typedef enum
     INST_SUB_REG, // [ ]
     INST_DIV_REG, // [ ]
     INST_MUL_REG, // [ ]
-    INST_POP_REG, // [ ]
+    INST_POP_REG,
     INST_XOR,
     INST_AND,
     INST_NOT,

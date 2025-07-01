@@ -1,6 +1,6 @@
 # aym
 
-Just a simple VM in c for learning purpose
+Just a simple Hybird based VM in c for learning purpose
 
 ## Build & Run
 
@@ -11,4 +11,4 @@ make
 
 ## Reference
 
-- [@tsoding](https://github.com/tsoding/bm/) - [bm](https://github.com/tsoding/bm/)
+- [@tsoding](https://github.com/tsoding/) - [bm](https://github.com/tsoding/bm/)

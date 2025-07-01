@@ -189,6 +189,12 @@ Err aym_execute_inst( AYM *vm )
         break;
 
     case INST_POP_REG:
+        if ( vm->registers[ REG_ESP ].as_u64 < 1 )
+        {
+            return ERR_STACK_UNDERFLOW;
+        }
+        vm->registers[ inst.dst.reg ].as_u64 = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
+        break;
 
     case INST_ADD:
         if ( inst.dst.type == OPERAND_REGISTER )
