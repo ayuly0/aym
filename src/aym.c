@@ -4,13 +4,14 @@ char *err_as_cstr( Err err )
 {
     switch ( err )
     {
-    case ERR_STACK_OVERFLOW     : return "STACK_OVERFLOW";
-    case ERR_STACK_UNDERFLOW    : return "STACK_UNDERFLOW";
-    case ERR_ILLEGAL_INST_ACCESS: return "ERR_ILLEGAL_INST_ACCESS";
-    case ERR_ILLEGAL_INST       : return "ERR_ILLEGAL_INST";
-    case ERR_DIV_BY_ZERO        : return "ERR_DIV_BY_ZERO";
-    case ERR_UNKOWN_SYSCALL     : return "ERR_UNKOWN_SYSCALL";
-    default                     : return "UNKOWN_ERR";
+    case ERR_STACK_OVERFLOW      : return "STACK_OVERFLOW";
+    case ERR_STACK_UNDERFLOW     : return "STACK_UNDERFLOW";
+    case ERR_ILLEGAL_INST_ACCESS : return "ERR_ILLEGAL_INST_ACCESS";
+    case ERR_ILLEGAL_INST        : return "ERR_ILLEGAL_INST";
+    case ERR_DIV_BY_ZERO         : return "ERR_DIV_BY_ZERO";
+    case ERR_ILLEGAL_OPERAND_TYPE: return "ERR_ILLEGAL_OPERAND_TYPE";
+    case ERR_UNKOWN_SYSCALL      : return "ERR_UNKOWN_SYSCALL";
+    default                      : return "UNKOWN_ERR";
     }
 }
 
@@ -183,7 +184,7 @@ Err aym_execute_inst( AYM *vm )
         }
         else
         {
-            /*throw err*/
+            return ERR_ILLEGAL_OPERAND_TYPE;
         }
         vm->registers[ REG_IP ].as_u64++;
         break;
@@ -200,6 +201,10 @@ Err aym_execute_inst( AYM *vm )
         if ( inst.dst.type == OPERAND_REGISTER )
         {
             vm->registers[ inst.dst.reg ].as_i64 += aym_reslove_operand( vm, inst.src ).as_i64;
+        }
+        else
+        {
+            return ERR_ILLEGAL_OPERAND_TYPE;
         }
         vm->registers[ REG_IP ].as_u64++;
         break;
