@@ -48,6 +48,14 @@ char *inst_as_cstr( InstType inst_type )
     case INST_JMP : return "INST_JMP";
     case INST_JE  : return "INST_JE";
     case INST_JNE : return "INST_JNE";
+    case INST_JG  : return "INST_JG";
+    case INST_JL  : return "INST_JL";
+    case INST_JGE : return "INST_JGE";
+    case INST_JLE : return "INST_JLE";
+    case INST_JA  : return "INST_JA";
+    case INST_JB  : return "INST_JB";
+    case INST_JAE : return "INST_JAE";
+    case INST_JBE : return "INST_JBE";
     case INST_CALL: return "INST_CALL";
     case INST_RET : return "INST_RET";
 
@@ -292,8 +300,10 @@ Err aym_execute_inst( AYM *vm )
     }
 
     case INST_CMP: {
+        Word a = aym_reslove_operand( vm, inst.src );
+        Word b = aym_reslove_operand( vm, inst.dst );
         Word r;
-        r.as_i64 = aym_reslove_operand( vm, inst.src ).as_i64 - aym_reslove_operand( vm, inst.dst ).as_i64;
+        r.as_i64 = a.as_i64 - b.as_i64;
 
         vm->registers[ REG_FLAGS ].as_u64 = 0;
         if ( r.as_i64 == 0 )
@@ -303,6 +313,10 @@ Err aym_execute_inst( AYM *vm )
         if ( r.as_i64 < 0 )
         {
             vm->registers[ REG_FLAGS ].as_u64 |= FLAG_SIGN;
+        }
+        if ( ( ( a.as_i64 ^ b.as_i64 ) & ( a.as_i64 ^ r.as_i64 ) ) < 0 )
+        {
+            vm->registers[ REG_FLAGS ].as_u64 |= FLAG_OVERFLOW;
         }
         vm->registers[ REG_IP ].as_u64++;
         break;
@@ -350,6 +364,78 @@ Err aym_execute_inst( AYM *vm )
         }
         vm->registers[ REG_IP ].as_u64++;
         break;
+
+    case INST_JG: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( !( flags.as_u64 & FLAG_ZERO ) && ( ( flags.as_u64 & FLAG_SIGN ) == ( flags.as_u64 & FLAG_OVERFLOW ) ) )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
+
+    case INST_JL: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( ( flags.as_u64 & FLAG_SIGN ) != ( flags.as_u64 & FLAG_OVERFLOW ) )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
+
+    case INST_JGE: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( ( flags.as_u64 & FLAG_SIGN ) == ( flags.as_u64 & FLAG_OVERFLOW ) )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
+
+    case INST_JLE: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( ( flags.as_u64 & FLAG_ZERO ) || ( ( flags.as_u64 & FLAG_SIGN ) != ( flags.as_u64 & FLAG_OVERFLOW ) ) )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
+
+    case INST_JA: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( !( flags.as_u64 & FLAG_ZERO ) && !( flags.as_u64 & FLAG_CARRY ) )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
+
+    case INST_JB: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( flags.as_u64 & FLAG_CARRY )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
+
+    case INST_JAE: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( !( flags.as_u64 & FLAG_CARRY ) )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
+
+    case INST_JBE: {
+        Word flags = vm->registers[ REG_FLAGS ];
+        if ( ( flags.as_u64 & FLAG_ZERO ) && ( flags.as_u64 & FLAG_CARRY ) )
+        {
+            vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
+        }
+        break;
+    }
 
     case INST_CALL:
         if ( vm->registers[ REG_ESP ].as_u64 >= AYM_STACK_SIZE )

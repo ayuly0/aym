@@ -15,10 +15,10 @@
 
 // vm->regs[flags] |= FLAG_ZERO;   -> set zero flag
 // vm->regs[flags] &= ~FLAG_ZERO;  -> clear zero flag
-#define FLAG_ZERO  ( 1 << 0 )
-#define FLAG_SIGN  ( 1 << 1 )
-#define FLAG_CARRY ( 1 << 2 )
-#define FLAG_OVER  ( 1 << 3 )
+#define FLAG_ZERO     ( 1 << 0 )
+#define FLAG_SIGN     ( 1 << 1 )
+#define FLAG_CARRY    ( 1 << 2 )
+#define FLAG_OVERFLOW ( 1 << 3 )
 
 typedef enum
 {
@@ -69,6 +69,14 @@ typedef enum
     INST_JMP,
     INST_JE,
     INST_JNE,
+    INST_JG,
+    INST_JL,
+    INST_JGE,
+    INST_JLE,
+    INST_JA,
+    INST_JB,
+    INST_JAE,
+    INST_JBE,
     INST_CALL,
     INST_RET,
 
