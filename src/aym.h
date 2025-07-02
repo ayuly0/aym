@@ -77,6 +77,7 @@ typedef enum
     INST_JB,
     INST_JAE,
     INST_JBE,
+    INST_INC,
     INST_CALL,
     INST_RET,
 

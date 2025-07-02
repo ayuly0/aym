@@ -56,6 +56,7 @@ char *inst_as_cstr( InstType inst_type )
     case INST_JB  : return "INST_JB";
     case INST_JAE : return "INST_JAE";
     case INST_JBE : return "INST_JBE";
+    case INST_INC : return "INST_INC";
     case INST_CALL: return "INST_CALL";
     case INST_RET : return "INST_RET";
 
@@ -434,6 +435,19 @@ Err aym_execute_inst( AYM *vm )
         {
             vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst );
         }
+        break;
+    }
+
+    case INST_INC: {
+        if ( inst.dst.type == OPERAND_REGISTER )
+        {
+            vm->registers[ inst.dst.reg ].as_u64++;
+        }
+        else
+        {
+            return ERR_ILLEGAL_OPERAND_TYPE;
+        }
+        vm->registers[ REG_IP ].as_u64++;
         break;
     }
 
