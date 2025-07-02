@@ -83,10 +83,16 @@ typedef enum
     REG_3,
     REG_4,
     REG_5,
+    REG_6,
+    REG_7,
+    REG_8,
+    REG_9,
     REG_BP,
     REG_ESP,
     REG_IP,
-    REG_FLAGS
+    REG_FLAGS,
+
+    REG_COUNT
 } RegisterType;
 
 typedef enum
@@ -120,7 +126,7 @@ typedef struct AYM_t
     Inst program[ AYM_PROGRAM_SIZE ];
     u64 program_size;
 
-    Word registers[ 10 ];
+    Word registers[ REG_COUNT ];
     Word memory[ AYM_MEMORY_SIZE ];
 
     bool halt;
