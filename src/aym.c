@@ -442,6 +442,7 @@ Err aym_execute_inst( AYM *vm )
         if ( inst.dst.type == OPERAND_REGISTER )
         {
             vm->registers[ inst.dst.reg ].as_u64++;
+            vm->registers[ REG_FLAGS ].as_u64 = ( vm->registers[ inst.dst.reg ].as_u64 == 0 );
         }
         else
         {
