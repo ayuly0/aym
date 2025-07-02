@@ -46,8 +46,8 @@ char *inst_as_cstr( InstType inst_type )
     case INST_STORE  : return "INST_STORE";
 
     case INST_JMP : return "INST_JMP";
-    case INST_JZ  : return "INST_JZ";
-    case INST_JNZ : return "INST_JNZ";
+    case INST_JE  : return "INST_JE";
+    case INST_JNE : return "INST_JNE";
     case INST_CALL: return "INST_CALL";
     case INST_RET : return "INST_RET";
 
@@ -331,7 +331,7 @@ Err aym_execute_inst( AYM *vm )
 
     // Control Flow
     case INST_JMP: vm->registers[ REG_IP ] = aym_reslove_operand( vm, inst.dst ); break;
-    case INST_JNZ:
+    case INST_JNE:
         if ( !( vm->registers[ REG_FLAGS ].as_u64 & FLAG_ZERO ) )
         {
             Word ip_to_jmp          = aym_reslove_operand( vm, inst.dst );
@@ -341,7 +341,7 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_JZ:
+    case INST_JE:
         if ( vm->registers[ REG_FLAGS ].as_u64 & FLAG_ZERO )
         {
             Word ip_to_jmp          = aym_reslove_operand( vm, inst.dst );

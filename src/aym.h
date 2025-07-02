@@ -67,8 +67,8 @@ typedef enum
     INST_STORE,
 
     INST_JMP,
-    INST_JZ,
-    INST_JNZ,
+    INST_JE,
+    INST_JNE,
     INST_CALL,
     INST_RET,
 
