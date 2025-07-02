@@ -210,10 +210,46 @@ Err aym_execute_inst( AYM *vm )
         break;
 
     case INST_SUB_REG:
+        if ( inst.dst.type == OPERAND_REGISTER )
+        {
+            vm->registers[ inst.dst.reg ].as_i64 -= aym_reslove_operand( vm, inst.src ).as_i64;
+        }
+        else
+        {
+            return ERR_ILLEGAL_OPERAND_TYPE;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
 
     case INST_DIV_REG:
+        if ( inst.dst.type == OPERAND_REGISTER )
+        {
+            i64 value = aym_reslove_operand( vm, inst.src ).as_i64;
+            if ( value == 0 )
+            {
+                return ERR_DIV_BY_ZERO;
+            }
+
+            vm->registers[ inst.dst.reg ].as_i64 /= value;
+        }
+        else
+        {
+            return ERR_ILLEGAL_OPERAND_TYPE;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
 
     case INST_MUL_REG:
+        if ( inst.dst.type == OPERAND_REGISTER )
+        {
+            vm->registers[ inst.dst.reg ].as_i64 *= aym_reslove_operand( vm, inst.src ).as_i64;
+        }
+        else
+        {
+            return ERR_ILLEGAL_OPERAND_TYPE;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
 
     case INST_XOR: {
         Word a = aym_reslove_operand( vm, inst.dst );
