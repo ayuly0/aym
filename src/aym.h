@@ -159,6 +159,8 @@ Err aym_execute_inst( AYM *vm );
 
 Err aym_execute_program( AYM *vm );
 
+AYM_Status aym_load_program_from_mem( AYM *vm, Inst *program, size_t program_size );
+
 Word aym_reslove_operand( AYM *vm, Operand operand );
 
 void aym_dump_stack( FILE *stream, AYM *vm );

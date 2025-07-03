@@ -512,6 +512,35 @@ Err aym_execute_program( AYM *vm )
     return ERR_OK;
 }
 
+AYM_Status aym_load_program_from_mem( AYM *vm, Inst *program, size_t program_size )
+{
+    if ( !vm )
+    {
+        return AYM_ERR_NULL_VM;
+    }
+
+    if ( !program )
+    {
+        return AYM_ERR_NULL_PROGRAM;
+    }
+
+    if ( program_size == 0 || program_size > AYM_MAX_PROGRAM_SIZE )
+    {
+        return AYM_ERR_PROGRAM_TOO_LARGE;
+    }
+
+    size_t total_bytes;
+    if ( __builtin_mul_overflow( program_size, sizeof( Inst ), &total_bytes ) )
+    {
+        return AYM_ERR_INVALID_SIZE;
+    }
+
+    vm->program_size = program_size;
+    memcpy( vm->program, program, sizeof( Inst ) * program_size );
+
+    return AYM_SUCCESS;
+}
+
 Word aym_reslove_operand( AYM *vm, Operand operand )
 {
     if ( operand.type == OPERAND_IMMEDIATE )

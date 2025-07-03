@@ -30,7 +30,7 @@ int main( int argc, char **argv )
         ( Inst ){ INST_CALL, .dst = { OPERAND_IMMEDIATE, .imm = 0x5 } },
         ( Inst ){ INST_ADD, .dst = { OPERAND_REGISTER, .reg = REG_0 }, .src = { OPERAND_IMMEDIATE, .imm = 1 } },
         ( Inst ){ INST_CMP, { OPERAND_REGISTER, .reg = REG_0 }, { OPERAND_IMMEDIATE, .imm = 5 } },
-        ( Inst ){ INST_JNZ, .dst = { OPERAND_IMMEDIATE, .imm = 0 } },
+        ( Inst ){ INST_JNE, .dst = { OPERAND_IMMEDIATE, .imm = 0 } },
         MAKE_INST_HALT,
         // write:
         MAKE_INST_PUSH( 1 ),
@@ -40,8 +40,8 @@ int main( int argc, char **argv )
         MAKE_INST_SYSCALL,
         ( Inst ){ INST_RET },
     };
-    vm.program_size = sizeof( pg ) / sizeof( pg[ 0 ] );
-    memcpy( vm.program, pg, sizeof( pg[ 0 ] ) * vm.program_size );
+
+    aym_load_program_from_mem( &vm, pg, sizeof( pg ) / sizeof( pg[ 0 ] ) );
 
     Err err = aym_execute_program( &vm );
     if ( err != ERR_OK )
