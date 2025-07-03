@@ -10,8 +10,8 @@ char *err_as_cstr( Err err )
     case ERR_ILLEGAL_INST        : return "ERR_ILLEGAL_INST";
     case ERR_DIV_BY_ZERO         : return "ERR_DIV_BY_ZERO";
     case ERR_ILLEGAL_OPERAND_TYPE: return "ERR_ILLEGAL_OPERAND_TYPE";
-    case ERR_UNKOWN_SYSCALL      : return "ERR_UNKOWN_SYSCALL";
-    default                      : return "UNKOWN_ERR";
+    case ERR_UNKOWN_SYSCALL      : return "ERR_UNKNOWN_SYSCALL";
+    default                      : return "UNKNOWN_ERR";
     }
 }
 
