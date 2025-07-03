@@ -128,13 +128,13 @@ typedef struct
 
 typedef struct AYM_t
 {
-    Word stack[ AYM_STACK_SIZE ];
+    Word stack[ AYM_MAX_STACK_SIZE ];
 
-    Inst program[ AYM_PROGRAM_SIZE ];
+    Inst program[ AYM_MAX_PROGRAM_SIZE ];
     u64 program_size;
 
     Word registers[ REG_COUNT ];
-    Word memory[ AYM_MEMORY_SIZE ];
+    Word memory[ AYM_MAX_MEMORY_SIZE ];
 
     bool halt;
 } AYM;
