@@ -597,7 +597,6 @@ Err invoke_syscall( AYM *vm )
     {
     case SYSCALL_EXIT: {
         u64 code = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
-        printf( "VM exiting wth code %llu", code );
         vm->halt = true;
         break;
     }
