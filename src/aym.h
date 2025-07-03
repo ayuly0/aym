@@ -9,9 +9,9 @@
 
 #include "types.h"
 
-#define AYM_STACK_SIZE   1024 * 1024 // 1MB
-#define AYM_PROGRAM_SIZE 1024 * 1024 // 1MB
-#define AYM_MEMORY_SIZE  1024 * 1024 // 1MB
+#define AYM_MAX_STACK_SIZE   1024 * 1024 // 1MB
+#define AYM_MAX_PROGRAM_SIZE 1024 * 1024 // 1MB
+#define AYM_MAX_MEMORY_SIZE  1024 * 1024 // 1MB
 
 // vm->regs[flags] |= FLAG_ZERO;   -> set zero flag
 // vm->regs[flags] &= ~FLAG_ZERO;  -> clear zero flag
