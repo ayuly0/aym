@@ -81,9 +81,9 @@ void aym_init( AYM *vm )
 {
     vm->halt = false;
 
-    memset( vm->stack, 0, AYM_STACK_SIZE );
-    memset( vm->memory, 0, AYM_MEMORY_SIZE );
-    memset( vm->program, 0, AYM_PROGRAM_SIZE );
+    memset( vm->stack, 0, AYM_MAX_STACK_SIZE );
+    memset( vm->memory, 0, AYM_MAX_MEMORY_SIZE );
+    memset( vm->program, 0, AYM_MAX_PROGRAM_SIZE );
 }
 
 Err aym_execute_inst( AYM *vm )
@@ -100,7 +100,7 @@ Err aym_execute_inst( AYM *vm )
     case INST_NOP: vm->registers[ REG_IP ].as_u64++; break;
 
     case INST_PUSH:
-        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_STACK_SIZE )
+        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_MAX_STACK_SIZE )
         {
             return ERR_STACK_OVERFLOW;
         }
@@ -240,7 +240,7 @@ Err aym_execute_inst( AYM *vm )
         break;
 
     case INST_DUP:
-        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_STACK_SIZE )
+        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_MAX_STACK_SIZE )
         {
             return ERR_STACK_OVERFLOW;
         }
@@ -473,7 +473,7 @@ Err aym_execute_inst( AYM *vm )
     }
 
     case INST_CALL:
-        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_STACK_SIZE )
+        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_MAX_STACK_SIZE )
         {
             return ERR_STACK_OVERFLOW;
         }
