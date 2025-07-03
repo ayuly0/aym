@@ -19,31 +19,28 @@ char *inst_as_cstr( InstType inst_type )
 {
     switch ( inst_type )
     {
-    case INST_NOP      : return "INST_NOP";
-    case INST_PUSH     : return "INST_PUSH";
-    case INST_POP_STACK: return "INST_POP_STACK";
-    case INST_SWAP     : return "INST_SWAP";
-    case INST_PLUS     : return "INST_PLUS";
-    case INST_SUB_STACK: return "INST_SUB_STACK";
-    case INST_DIV_STACK: return "INST_DIV_STACK";
-    case INST_MUL_STACK: return "INST_MUL_STACK";
-    case INST_DUP      : return "INST_DUP";
+    case INST_NOP : return "INST_NOP";
+    case INST_PUSH: return "INST_PUSH";
+    case INST_SWAP: return "INST_SWAP";
+    case INST_PLUS: return "INST_PLUS";
+    case INST_DUP : return "INST_DUP";
 
-    case INST_MOV    : return "INST_MOV";
-    case INST_ADD    : return "INST_ADD";
-    case INST_SUB_REG: return "INST_SUB_REG";
-    case INST_DIV_REG: return "INST_DIV_REG";
-    case INST_MUL_REG: return "INST_MUL_REG";
-    case INST_POP_REG: return "INST_POP_REG";
-    case INST_XOR    : return "INST_XOR";
-    case INST_AND    : return "INST_AND";
-    case INST_NOT    : return "INST_NOT";
-    case INST_OR     : return "INST_OR";
-    case INST_LEA    : return "INST_LEA";
-    case INST_CMP    : return "INST_CMP";
-    case INST_TEST   : return "INST_TEST";
-    case INST_LOAD   : return "INST_LOAD";
-    case INST_STORE  : return "INST_STORE";
+    case INST_SUB: return "INST_SUB";
+    case INST_DIV: return "INST_DIV";
+    case INST_MUL: return "INST_MUL";
+    case INST_POP: return "INST_POP";
+
+    case INST_MOV  : return "INST_MOV";
+    case INST_ADD  : return "INST_ADD";
+    case INST_XOR  : return "INST_XOR";
+    case INST_AND  : return "INST_AND";
+    case INST_NOT  : return "INST_NOT";
+    case INST_OR   : return "INST_OR";
+    case INST_LEA  : return "INST_LEA";
+    case INST_CMP  : return "INST_CMP";
+    case INST_TEST : return "INST_TEST";
+    case INST_LOAD : return "INST_LOAD";
+    case INST_STORE: return "INST_STORE";
 
     case INST_JMP : return "INST_JMP";
     case INST_JE  : return "INST_JE";
@@ -97,12 +94,22 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_POP_STACK:
-        if ( vm->registers[ REG_ESP ].as_u64 <= 0 )
+    case INST_POP:
+        if ( inst.dst.reg != 0 )
         {
-            return ERR_STACK_UNDERFLOW;
+            if ( vm->registers[ REG_ESP ].as_u64 < 1 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->registers[ inst.dst.reg ].as_u64 = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
         }
-        vm->registers[ REG_ESP ].as_u64--;
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 <= 0 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->registers[ REG_ESP ].as_u64--;
+        }
         vm->registers[ REG_IP ].as_u64++;
         break;
 
@@ -129,43 +136,92 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_SUB_STACK:
-        if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+    case INST_SUB:
+        if ( inst.dst.reg != 0 )
         {
-            return ERR_STACK_UNDERFLOW;
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                vm->registers[ inst.dst.reg ].as_i64 -= aym_reslove_operand( vm, inst.src ).as_i64;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
         }
-        vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
-            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 -
-            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
-        vm->registers[ REG_ESP ].as_u64--;
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 -
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+        }
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_DIV_STACK:
-        if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+    case INST_DIV:
+
+        if ( inst.dst.reg != 0 )
         {
-            return ERR_STACK_UNDERFLOW;
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                i64 value = aym_reslove_operand( vm, inst.src ).as_i64;
+                if ( value == 0 )
+                {
+                    return ERR_DIV_BY_ZERO;
+                }
+
+                vm->registers[ inst.dst.reg ].as_i64 /= value;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
         }
-        if ( vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64 == 0 )
+        else
         {
-            return ERR_DIV_BY_ZERO;
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            if ( vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64 == 0 )
+            {
+                return ERR_DIV_BY_ZERO;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 /
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
         }
-        vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
-            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 /
-            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
-        vm->registers[ REG_ESP ].as_u64--;
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_MUL_STACK:
-        if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+    case INST_MUL:
+        if ( inst.dst.reg != 0 )
         {
-            return ERR_STACK_UNDERFLOW;
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                vm->registers[ inst.dst.reg ].as_i64 *= aym_reslove_operand( vm, inst.src ).as_i64;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
         }
-        vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
-            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 *
-            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
-        vm->registers[ REG_ESP ].as_u64--;
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 *
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+        }
         vm->registers[ REG_IP ].as_u64++;
         break;
 
@@ -198,60 +254,10 @@ Err aym_execute_inst( AYM *vm )
         vm->registers[ REG_IP ].as_u64++;
         break;
 
-    case INST_POP_REG:
-        if ( vm->registers[ REG_ESP ].as_u64 < 1 )
-        {
-            return ERR_STACK_UNDERFLOW;
-        }
-        vm->registers[ inst.dst.reg ].as_u64 = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
-        break;
-
     case INST_ADD:
         if ( inst.dst.type == OPERAND_REGISTER )
         {
             vm->registers[ inst.dst.reg ].as_i64 += aym_reslove_operand( vm, inst.src ).as_i64;
-        }
-        else
-        {
-            return ERR_ILLEGAL_OPERAND_TYPE;
-        }
-        vm->registers[ REG_IP ].as_u64++;
-        break;
-
-    case INST_SUB_REG:
-        if ( inst.dst.type == OPERAND_REGISTER )
-        {
-            vm->registers[ inst.dst.reg ].as_i64 -= aym_reslove_operand( vm, inst.src ).as_i64;
-        }
-        else
-        {
-            return ERR_ILLEGAL_OPERAND_TYPE;
-        }
-        vm->registers[ REG_IP ].as_u64++;
-        break;
-
-    case INST_DIV_REG:
-        if ( inst.dst.type == OPERAND_REGISTER )
-        {
-            i64 value = aym_reslove_operand( vm, inst.src ).as_i64;
-            if ( value == 0 )
-            {
-                return ERR_DIV_BY_ZERO;
-            }
-
-            vm->registers[ inst.dst.reg ].as_i64 /= value;
-        }
-        else
-        {
-            return ERR_ILLEGAL_OPERAND_TYPE;
-        }
-        vm->registers[ REG_IP ].as_u64++;
-        break;
-
-    case INST_MUL_REG:
-        if ( inst.dst.type == OPERAND_REGISTER )
-        {
-            vm->registers[ inst.dst.reg ].as_i64 *= aym_reslove_operand( vm, inst.src ).as_i64;
         }
         else
         {

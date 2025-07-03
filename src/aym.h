@@ -42,20 +42,17 @@ typedef enum
 {
     INST_NOP = 0,
     INST_PUSH,
-    INST_POP_STACK,
     INST_SWAP,
     INST_PLUS,
-    INST_SUB_STACK,
-    INST_DIV_STACK,
-    INST_MUL_STACK,
     INST_DUP,
+
+    INST_SUB,
+    INST_DIV,
+    INST_MUL,
+    INST_POP,
 
     INST_MOV,
     INST_ADD,
-    INST_SUB_REG,
-    INST_DIV_REG,
-    INST_MUL_REG,
-    INST_POP_REG,
     INST_XOR,
     INST_AND,
     INST_NOT,
@@ -87,7 +84,7 @@ typedef enum
 
 typedef enum
 {
-    REG_0 = 0,
+    REG_0 = 1,
     REG_1,
     REG_2,
     REG_3,
