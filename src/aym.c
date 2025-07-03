@@ -15,6 +15,20 @@ char *err_as_cstr( Err err )
     }
 }
 
+char *aym_status_as_cstr( AYM_Status status )
+{
+    switch ( status )
+    {
+    case AYM_SUCCESS              : return "AYM_SUCCESS";
+    case AYM_ERR_NULL_VM          : return "AYM_ERR_NULL_VM";
+    case AYM_ERR_NULL_PROGRAM     : return "AYM_ERR_NULL_PROGRAM";
+    case AYM_ERR_PROGRAM_TOO_LARGE: return "AYM_ERR_PROGRAM_TOO_LARGE";
+    case AYM_ERR_INVALID_SIZE     : return "AYM_ERR_INVALID_SIZE";
+    case AYM_ERR_MEMCPY_FAILED    : return "AYM_ERR_MEMCPY_FAILED";
+    default                       : return "UNKNOWN_AYM_STATUS";
+    }
+}
+
 char *inst_as_cstr( InstType inst_type )
 {
     switch ( inst_type )

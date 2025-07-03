@@ -151,6 +151,8 @@ typedef struct AYM_t
 
 char *err_as_cstr( Err err );
 
+char *aym_status_as_cstr( AYM_Status status );
+
 char *inst_as_cstr( InstType inst_type );
 
 void aym_init( AYM *vm );
