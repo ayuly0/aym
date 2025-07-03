@@ -40,6 +40,16 @@ typedef enum
 
 typedef enum
 {
+    AYM_SUCCESS = 0,
+    AYM_ERR_NULL_VM,
+    AYM_ERR_NULL_PROGRAM,
+    AYM_ERR_PROGRAM_TOO_LARGE,
+    AYM_ERR_INVALID_SIZE,
+    AYM_ERR_MEMCPY_FAILED,
+} AYM_Status;
+
+typedef enum
+{
     INST_NOP = 0,
     INST_PUSH,
     INST_SWAP,
