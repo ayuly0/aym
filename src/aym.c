@@ -606,12 +606,15 @@ void aym_dump_register( FILE *stream, AYM *vm )
     fprintf( stream, "Registers:\n" );
     fprintf(
         stream,
-        "  Reg0: %p, Reg1: %p, Reg2: %p\n  Reg3: %p, Reg4: %p, Reg5: %p\n  Bp  : %p, Esp : %p, Ip  : %p\n  Flags: "
+        "  Reg0: %p, Reg1: %p, Reg2: %p\n  Reg3: %p, Reg4: %p, Reg5: %p\n  Reg6: %p, Reg7: %p, Reg8: %p\n  Reg9: %p, "
+        "Bp  : %p, "
+        "Esp : %p\n  Ip  : %p,  Flags: "
         "%p\n",
         vm->registers[ REG_0 ].as_ptr, vm->registers[ REG_1 ].as_ptr, vm->registers[ REG_2 ].as_ptr,
         vm->registers[ REG_3 ].as_ptr, vm->registers[ REG_4 ].as_ptr, vm->registers[ REG_5 ].as_ptr,
-        vm->registers[ REG_BP ].as_ptr, vm->registers[ REG_ESP ].as_ptr, vm->registers[ REG_IP ].as_ptr,
-        vm->registers[ REG_FLAGS ].as_ptr
+        vm->registers[ REG_6 ].as_ptr, vm->registers[ REG_7 ].as_ptr, vm->registers[ REG_8 ].as_ptr,
+        vm->registers[ REG_9 ].as_ptr, vm->registers[ REG_BP ].as_ptr, vm->registers[ REG_ESP ].as_ptr,
+        vm->registers[ REG_IP ].as_ptr, vm->registers[ REG_FLAGS ].as_ptr
     );
 }
 
