@@ -1,23 +1,5 @@
 #include "aym.h"
-
-#define MAKE_INST_PUSH( value ) { .type = INST_PUSH, .dst.imm = value }
-#define MAKE_INST_PLUS          { .type = INST_PLUS }
-#define MAKE_INST_SYSCALL       { .type = INST_SYSCALL }
-#define MAKE_INST_HALT          { .type = INST_HALT }
-#define MAKE_INST_MOV_REG_VAL( reg_, val_ )                                                                            \
-    {                                                                                                                  \
-        .type = INST_MOV, .dst = { .type = OPERAND_REGISTER, .reg = ( reg_ ) }, .src = {                               \
-            .type = OPERAND_IMMEDIATE,                                                                                 \
-            .imm  = ( val_ )                                                                                           \
-        }                                                                                                              \
-    }
-#define MAKE_INST_MOV_REG_REG( reg_1, reg_2 )                                                                          \
-    {                                                                                                                  \
-        .type = INST_MOV, .dst = { .type = OPERAND_REGISTER, .reg = ( reg_1 ) }, .src = {                              \
-            .type = OPERAND_REGISTER,                                                                                  \
-            .reg  = ( reg_2 )                                                                                          \
-        }                                                                                                              \
-    }
+#include "make_inst.h"
 
 int main( int argc, char **argv )
 {
@@ -27,18 +9,18 @@ int main( int argc, char **argv )
     char *str = "HELLO WORD\n";
     Inst pg[] = {
         // call 0x5
-        ( Inst ){ INST_CALL, .dst = { OPERAND_IMMEDIATE, .imm = 0x5 } },
-        ( Inst ){ INST_ADD, .dst = { OPERAND_REGISTER, .reg = REG_0 }, .src = { OPERAND_IMMEDIATE, .imm = 1 } },
-        ( Inst ){ INST_CMP, { OPERAND_REGISTER, .reg = REG_0 }, { OPERAND_IMMEDIATE, .imm = 5 } },
-        ( Inst ){ INST_JNE, .dst = { OPERAND_IMMEDIATE, .imm = 0 } },
-        MAKE_INST_HALT,
+        MAKE_CALL( OPERAND_IMMEDIATE, imm, 0x5 ),
+        MAKE_ADD( OPERAND_REGISTER, reg, REG_0, OPERAND_IMMEDIATE, imm, 1 ),
+        MAKE_CMP( OPERAND_REGISTER, reg, REG_0, OPERAND_IMMEDIATE, imm, 5 ),
+        MAKE_JNE( OPERAND_IMMEDIATE, imm, 0 ),
+        MAKE_HALT,
         // write:
-        MAKE_INST_PUSH( 1 ),
-        MAKE_INST_PUSH( ( u64 )( uintptr_t )str ),
-        MAKE_INST_PUSH( 11 ),
-        MAKE_INST_PUSH( SYSCALL_WRITE ),
-        MAKE_INST_SYSCALL,
-        ( Inst ){ INST_RET },
+        MAKE_PUSH( OPERAND_IMMEDIATE, imm, 1 ),
+        MAKE_PUSH( OPERAND_IMMEDIATE, imm, ( u64 )( uintptr_t )str ),
+        MAKE_PUSH( OPERAND_IMMEDIATE, imm, 11 ),
+        MAKE_PUSH( OPERAND_IMMEDIATE, imm, SYSCALL_WRITE ),
+        MAKE_SYSCALL,
+        MAKE_RET,
     };
 
     aym_load_program_from_mem( &vm, pg, sizeof( pg ) / sizeof( pg[ 0 ] ) );
