@@ -100,11 +100,22 @@ Err aym_execute_inst( AYM *vm )
     case INST_NOP: vm->registers[ REG_IP ].as_u64++; break;
 
     case INST_PUSH:
-        if ( vm->registers[ REG_ESP ].as_u64 >= AYM_MAX_STACK_SIZE )
+        if ( inst.dst.reg != 0 )
         {
-            return ERR_STACK_OVERFLOW;
+            if ( vm->registers[ REG_ESP ].as_u64 < 1 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = aym_reslove_operand( vm, inst.dst );
         }
-        vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = aym_reslove_operand( vm, inst.dst );
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 >= AYM_MAX_STACK_SIZE )
+            {
+                return ERR_STACK_OVERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64++ ] = aym_reslove_operand( vm, inst.dst );
+        }
         vm->registers[ REG_IP ].as_u64++;
         break;
 
