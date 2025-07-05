@@ -1,4 +1,7 @@
 #include "aym.h"
+#include "types.h"
+#include <assert.h>
+#include <stdlib.h>
 
 char *err_as_cstr( Err err )
 {
@@ -75,6 +78,30 @@ char *inst_as_cstr( InstType inst_type )
     case INST_HALT   : return "INST_HALT";
     default          : return "UNKOWN_INST";
     }
+}
+
+u32 operand_as_u32( Operand operand )
+{
+    switch ( operand.type )
+    {
+    case OPERAND_IMMEDIATE: return operand.imm.as_u64;
+    case OPERAND_REGISTER : return operand.reg;
+    case OPERAND_MEMORY   : return operand.mem_addr;
+    default               : return 0; // fallback for OPERAND_NONE or invalid
+    }
+}
+
+Operand u32_as_operand( OperandType type, u32 value )
+{
+    Operand op = { .type = type };
+    switch ( type )
+    {
+    case OPERAND_REGISTER : op.reg = value; break;
+    case OPERAND_IMMEDIATE: op.imm.as_u64 = value; break;
+    case OPERAND_MEMORY   : op.mem_addr = value; break;
+    default               : break;
+    }
+    return op;
 }
 
 void aym_init( AYM *vm )

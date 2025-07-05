@@ -156,6 +156,10 @@ char *aym_status_as_cstr( AYM_Status status );
 
 char *inst_as_cstr( InstType inst_type );
 
+u32 operand_as_u32( Operand operand );
+
+Operand u32_as_operand( OperandType type, u32 value );
+
 void aym_init( AYM *vm );
 
 Err aym_execute_inst( AYM *vm );
