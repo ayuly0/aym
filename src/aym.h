@@ -50,7 +50,7 @@ typedef enum
 
 typedef enum
 {
-    INST_NOP = 0,
+    INST_NOP = 0x00,
     INST_PUSH,
     INST_SWAP,
     INST_PLUS,
@@ -114,6 +114,7 @@ typedef enum
 
 typedef enum
 {
+    OPERAND_NONE = 0,
     OPERAND_IMMEDIATE,
     OPERAND_REGISTER,
     OPERAND_MEMORY
