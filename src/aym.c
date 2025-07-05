@@ -564,7 +564,7 @@ Err aym_execute_program( AYM *vm )
     return ERR_OK;
 }
 
-AYM_Status aym_load_program_from_mem( AYM *vm, Inst *program, size_t program_size )
+AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
 {
     if ( !vm )
     {
