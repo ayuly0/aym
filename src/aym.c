@@ -659,7 +659,7 @@ u32 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size 
     {
         Inst *inst           = &program[ i ];
         bytecode[ offset++ ] = inst->type;
-        printf( "Inst: %s (%p)\n", inst_as_cstr( inst->type ), ( void * )inst->type );
+        printf( "Inst: %s (0x%02X)\n", inst_as_cstr( inst->type ), inst->type );
 
         int operand_count = 0;
         // operand 1 (dst)
