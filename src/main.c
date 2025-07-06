@@ -24,7 +24,7 @@ int main( int argc, char **argv )
 
     size_t prog_size = sizeof( pg ) / sizeof( pg[ 0 ] );
     size_t out_size  = 0;
-    u32 *bytecode    = aym_inst_to_bytecode( pg, prog_size, &out_size );
+    u8 *bytecode     = aym_inst_to_bytecode( pg, prog_size, &out_size );
 
     for ( int i = 0; i < out_size; ++i )
     {
