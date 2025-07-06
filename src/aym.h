@@ -45,11 +45,11 @@ typedef enum
     AYM_ERR_NULL_PROGRAM,
     AYM_ERR_PROGRAM_TOO_LARGE,
     AYM_ERR_INVALID_SIZE,
+    AYM_ERR_MEMCPY_FAILED,
     AYM_ERR_FILE_NOT_FOUND,
     AYM_ERR_INVALID_FORMAT,
     AYM_ERR_ALLOC_FAILED,
     AYM_ERR_IO,
-    AYM_ERR_MEMCPY_FAILED,
 } AYM_Status;
 
 typedef enum
@@ -160,9 +160,9 @@ char *aym_status_as_cstr( AYM_Status status );
 
 char *inst_as_cstr( InstType inst_type );
 
-u32 operand_as_u32( Operand operand );
+u8 operand_as_u8( Operand operand );
 
-Operand u32_as_operand( OperandType type, u32 value );
+Operand u8_as_operand( OperandType type, u8 value );
 
 void aym_init( AYM *vm );
 
@@ -174,7 +174,9 @@ AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
 
 Inst *aym_bytecode_to_inst( u32 *bytecode, size_t bytecode_size );
 
-u32 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size );
+Inst *aym_bytecode_to_inst( u8 *bytecode, size_t bytecode_size );
+
+u8 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size );
 
 Word aym_reslove_operand( AYM *vm, Operand operand );
 

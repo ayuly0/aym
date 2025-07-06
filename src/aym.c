@@ -594,6 +594,46 @@ AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
 }
 
 Inst *aym_bytecode_to_inst( u32 *bytecode, size_t bytecode_size )
+AYM_Status aym_load_program_from_file( AYM *vm, char *file_path )
+{
+    FILE *f = fopen( file_path, "rb" );
+    if ( !f )
+    {
+        return AYM_ERR_FILE_NOT_FOUND;
+    }
+
+    fseek( f, 0, SEEK_END );
+    size_t size = ftell( f );
+    rewind( f );
+
+    if ( size == 0 )
+    {
+        fclose( f );
+        return AYM_ERR_INVALID_FORMAT;
+    }
+
+    u8 *buffer = malloc( size );
+    if ( !buffer )
+    {
+        fclose( f );
+        return AYM_ERR_ALLOC_FAILED;
+    }
+
+    size_t read_bytes = fread( buffer, 1, size, f );
+    fclose( f );
+
+    if ( read_bytes != size )
+    {
+        free( buffer );
+        return AYM_ERR_IO;
+    }
+
+    Inst *program     = aym_bytecode_to_inst( buffer, read_bytes );
+    AYM_Status status = aym_load_inst_from_mem( vm, program, read_bytes );
+
+    return status;
+}
+
 {
     assert( bytecode || bytecode_size >= 2 && "bytecode is NULL or small than 2 bytes" );
     size_t ip       = 0;
