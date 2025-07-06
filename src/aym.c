@@ -597,7 +597,7 @@ AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
     return AYM_SUCCESS;
 }
 
-AYM_Status aym_load_program_from_file( AYM *vm, char *file_path )
+AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path )
 {
     FILE *f = fopen( file_path, "rb" );
     if ( !f )
