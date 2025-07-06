@@ -172,7 +172,7 @@ Err aym_execute_program( AYM *vm );
 
 AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size );
 
-Inst *aym_bytecode_to_inst( u32 *bytecode, size_t bytecode_size );
+AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path );
 
 Inst *aym_bytecode_to_inst( u8 *bytecode, size_t bytecode_size );
 

@@ -6,7 +6,7 @@ int main( int argc, char **argv )
     static AYM vm = {};
     aym_init( &vm );
 
-    char *str = "HELLO WORD\n";
+    /*char *str = "HELLO WORD\n";*/
     Inst pg[] = {
         // call 0x5
         /*MAKE_CALL( OPERAND_IMMEDIATE, imm, 0x5 ),*/

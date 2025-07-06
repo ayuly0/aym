@@ -84,7 +84,7 @@ char *inst_as_cstr( InstType inst_type )
     }
 }
 
-u32 operand_as_u32( Operand operand )
+u8 operand_as_u8( Operand operand )
 {
     switch ( operand.type )
     {
@@ -95,7 +95,7 @@ u32 operand_as_u32( Operand operand )
     }
 }
 
-Operand u32_as_operand( OperandType type, u32 value )
+Operand u8_as_operand( OperandType type, u8 value )
 {
     Operand op = { .type = type };
     switch ( type )
@@ -597,7 +597,6 @@ AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
     return AYM_SUCCESS;
 }
 
-Inst *aym_bytecode_to_inst( u32 *bytecode, size_t bytecode_size )
 AYM_Status aym_load_program_from_file( AYM *vm, char *file_path )
 {
     FILE *f = fopen( file_path, "rb" );
@@ -638,6 +637,7 @@ AYM_Status aym_load_program_from_file( AYM *vm, char *file_path )
     return status;
 }
 
+Inst *aym_bytecode_to_inst( u8 *bytecode, size_t bytecode_size )
 {
     assert( bytecode || bytecode_size >= 2 && "bytecode is NULL or small than 2 bytes" );
     size_t ip       = 0;
@@ -659,8 +659,8 @@ AYM_Status aym_load_program_from_file( AYM *vm, char *file_path )
             }
         }
 
-        u32 opcode   = bytecode[ ip++ ];
-        u32 op_count = bytecode[ ip++ ];
+        u8 opcode   = bytecode[ ip++ ];
+        u8 op_count = bytecode[ ip++ ];
 
         Operand dst = { .type = OPERAND_NONE };
         Operand src = { .type = OPERAND_NONE };
@@ -668,15 +668,15 @@ AYM_Status aym_load_program_from_file( AYM *vm, char *file_path )
         if ( op_count >= 1 && ip + 1 < bytecode_size )
         {
             OperandType type = bytecode[ ip++ ];
-            u32 val          = bytecode[ ip++ ];
-            dst              = u32_as_operand( type, val );
+            u8 val           = bytecode[ ip++ ];
+            dst              = u8_as_operand( type, val );
         }
 
         if ( op_count == 2 && ip + 1 < bytecode_size )
         {
             OperandType type = bytecode[ ip++ ];
-            u32 val          = bytecode[ ip++ ];
-            src              = u32_as_operand( type, val );
+            u8 val           = bytecode[ ip++ ];
+            src              = u8_as_operand( type, val );
         }
 
         program[ count++ ] = ( Inst ){ .type = ( InstType )opcode, .dst = dst, .src = src };
@@ -685,12 +685,12 @@ AYM_Status aym_load_program_from_file( AYM *vm, char *file_path )
     return program;
 }
 
-u32 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size )
+u8 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size )
 {
     assert( program || program_size != 0 && "program is NULL" );
 
     size_t max_words = program_size * 6;
-    u32 *bytecode    = malloc( sizeof( Word ) * max_words );
+    u8 *bytecode     = malloc( sizeof( Word ) * max_words );
 
     assert( bytecode && "bytecode is NULL" );
     if ( !bytecode )
@@ -721,16 +721,16 @@ u32 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size 
         bytecode[ offset++ ] = operand_count;
         if ( inst->dst.type != OPERAND_NONE )
         {
-            printf( "  Dst Operand: %d, Value: %d\n", inst->dst.type, operand_as_u32( inst->dst ) );
+            printf( "  Dst Operand: %d, Value: %d\n", inst->dst.type, operand_as_u8( inst->dst ) );
             bytecode[ offset++ ] = inst->dst.type;
-            bytecode[ offset++ ] = operand_as_u32( inst->dst );
+            bytecode[ offset++ ] = operand_as_u8( inst->dst );
         }
 
         if ( inst->src.type != OPERAND_NONE )
         {
-            printf( "  Src Operand: %d, Value: %d\n", inst->src.type, operand_as_u32( inst->src ) );
+            printf( "  Src Operand: %d, Value: %d\n", inst->src.type, operand_as_u8( inst->src ) );
             bytecode[ offset++ ] = inst->src.type;
-            bytecode[ offset++ ] = operand_as_u32( inst->src );
+            bytecode[ offset++ ] = operand_as_u8( inst->src );
         }
     }
 
