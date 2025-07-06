@@ -91,7 +91,7 @@ u8 operand_as_u8( Operand operand )
     case OPERAND_IMMEDIATE: return operand.imm.as_u64;
     case OPERAND_REGISTER : return operand.reg;
     case OPERAND_MEMORY   : return operand.mem_addr;
-    default               : return 0; // fallback for OPERAND_NONE or invalid
+    default               : return OPERAND_NONE;
     }
 }
 
