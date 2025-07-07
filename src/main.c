@@ -33,6 +33,7 @@ int main( int argc, char **argv )
     }
 
     aym_write_bytecode_to_file( bytecode, "loop.aym", out_size );
+    aym_load_bytecode_from_file( &vm, "loop.aym", bytecode, &out_size );
 
     Inst *program_from_bytecode = aym_bytecode_to_inst( bytecode, out_size );
     aym_load_inst_from_mem( &vm, program_from_bytecode, prog_size );

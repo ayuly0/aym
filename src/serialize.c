@@ -7,6 +7,16 @@
 #include "aym.h"
 #include "serialize.h"
 
+u32 compute_checksum( const u8 *data, size_t len )
+{
+    u32 sum = 0;
+    for ( size_t i = 0; i < len; i++ )
+    {
+        sum += data[ i ];
+    }
+    return sum;
+}
+
 AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
 {
     if ( !vm )
@@ -36,47 +46,67 @@ AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
     return AYM_OK;
 }
 
-AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path )
+AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path, u8 *out_bytecode, size_t *out_size )
 {
-    FILE *f = fopen( file_path, "rb" );
-    if ( !f )
+    if ( !file_path || !out_bytecode || !out_size )
     {
-        return AYM_ERR_FILE_NOT_FOUND;
+        return AYM_INVALID_ARGUMENT;
     }
 
-    uint32_t size = 0;
-    if ( fread( &size, sizeof( uint32_t ), 1, f ) != 1 || size == 0 )
+    FILE *fp = fopen( file_path, "rb" );
+    if ( !fp )
     {
-        fclose( f );
-        return AYM_ERR_INVALID_FORMAT;
+        return AYM_FILE_ERROR;
     }
 
-    u8 *buffer = malloc( size );
-    if ( !buffer )
+    // Read header
+    AYM_Header hdr;
+    if ( fread( &hdr, 1, sizeof( hdr ), fp ) != sizeof( hdr ) )
     {
-        fclose( f );
-        return AYM_ERR_ALLOC_FAILED;
+        fclose( fp );
+        return AYM_READ_ERROR;
     }
 
-    size_t read_bytes = fread( buffer, 1, size, f );
-    fclose( f );
-
-    if ( read_bytes != size )
+    // Validate header
+    if ( hdr.magic != AYM_MAGIC || hdr.version != AYM_VERSION || hdr.header_size != sizeof( AYM_Header ) )
     {
-        free( buffer );
-        return AYM_ERR_IO;
+        fclose( fp );
+        return AYM_BAD_HEADER;
     }
 
-    Inst *program     = aym_bytecode_to_inst( buffer, size );
-    AYM_Status status = aym_load_inst_from_mem( vm, program, size );
+    // Allocate buffer for bytecode
+    u8 *buf = ( u8 * )malloc( hdr.bytecode_size );
+    if ( !buf )
+    {
+        fclose( fp );
+        return AYM_FILE_ERROR;
+    }
 
-    free( buffer );
-    return status;
+    // Read bytecode blob
+    if ( fread( buf, 1, hdr.bytecode_size, fp ) != hdr.bytecode_size )
+    {
+        free( buf );
+        fclose( fp );
+        return AYM_READ_ERROR;
+    }
+    fclose( fp );
+
+    // Verify checksum
+    uint32_t chk = compute_checksum( buf, hdr.bytecode_size );
+    if ( chk != hdr.checksum )
+    {
+        free( buf );
+        return AYM_CHECKSUM_MISMATCH;
+    }
+
+    out_bytecode = buf;
+    *out_size    = hdr.bytecode_size;
+    return AYM_OK;
 }
 
 AYM_Status aym_write_bytecode_to_file( u8 *bytecode, char *file_path, size_t bytecode_size )
 {
-    if ( !bytecode || !file_path )
+    if ( !bytecode || !file_path || bytecode_size == 0 )
     {
         return AYM_INVALID_ARGUMENT;
     }
@@ -87,14 +117,29 @@ AYM_Status aym_write_bytecode_to_file( u8 *bytecode, char *file_path, size_t byt
         return AYM_FILE_ERROR;
     }
 
-    size_t written = fwrite( bytecode, 1, bytecode_size, fp );
-    fclose( fp );
+    // Fill header
+    AYM_Header hdr;
+    hdr.magic         = AYM_MAGIC;
+    hdr.version       = AYM_VERSION;
+    hdr.header_size   = sizeof( AYM_Header );
+    hdr.bytecode_size = ( uint32_t )bytecode_size;
+    hdr.checksum      = compute_checksum( bytecode, bytecode_size );
 
-    if ( written != bytecode_size )
+    // Write header
+    if ( fwrite( &hdr, 1, sizeof( hdr ), fp ) != sizeof( hdr ) )
     {
+        fclose( fp );
         return AYM_WRITE_ERROR;
     }
 
+    // Write bytecode blob
+    if ( fwrite( bytecode, 1, bytecode_size, fp ) != bytecode_size )
+    {
+        fclose( fp );
+        return AYM_WRITE_ERROR;
+    }
+
+    fclose( fp );
     return AYM_OK;
 }
 

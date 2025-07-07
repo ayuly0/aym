@@ -6,10 +6,12 @@
 
 typedef uint64_t u64;
 typedef uint32_t u32;
+typedef uint16_t u16;
 typedef uint8_t u8;
 
 typedef int64_t i64;
 typedef int32_t i32;
+typedef int16_t i16;
 typedef int8_t i8;
 
 typedef union {
@@ -18,6 +20,9 @@ typedef union {
     double as_f64;
     void *as_ptr;
 } Word;
+
+#define AYM_MAGIC   0x004D4159
+#define AYM_VERSION 1
 
 #define AYM_MAX_STACK_SIZE   1024 * 1024 // 1MB
 #define AYM_MAX_PROGRAM_SIZE 1024 * 1024 // 1MB
@@ -56,7 +61,10 @@ typedef enum
     AYM_ERR_IO,
     AYM_FILE_ERROR,
     AYM_WRITE_ERROR,
+    AYM_READ_ERROR,
     AYM_INVALID_ARGUMENT,
+    AYM_BAD_HEADER,
+    AYM_CHECKSUM_MISMATCH,
 } AYM_Status;
 
 typedef enum

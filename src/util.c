@@ -31,7 +31,10 @@ char *aym_status_as_cstr( AYM_Status status )
     case AYM_ERR_IO               : return "AYM_ERR_IO";
     case AYM_FILE_ERROR           : return "AYM_FILE_ERROR";
     case AYM_WRITE_ERROR          : return "AYM_WRITE_ERROR";
+    case AYM_READ_ERROR           : return "AYM_READ_ERROR";
     case AYM_INVALID_ARGUMENT     : return "AYM_INVALID_ARGUMENT";
+    case AYM_BAD_HEADER           : return "AYM_BAD_HEADER";
+    case AYM_CHECKSUM_MISMATCH    : return "AYM_CHECKSUM_MISMATCH";
     default                       : return "UNKNOWN_AYM_STATUS";
     }
 }
