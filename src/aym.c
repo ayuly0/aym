@@ -608,11 +608,8 @@ AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path )
         return AYM_ERR_FILE_NOT_FOUND;
     }
 
-    fseek( f, 0, SEEK_END );
-    size_t size = ftell( f );
-    rewind( f );
-
-    if ( size == 0 )
+    uint32_t size = 0;
+    if ( fread( &size, sizeof( uint32_t ), 1, f ) != 1 || size == 0 )
     {
         fclose( f );
         return AYM_ERR_INVALID_FORMAT;
@@ -634,9 +631,10 @@ AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path )
         return AYM_ERR_IO;
     }
 
-    Inst *program     = aym_bytecode_to_inst( buffer, read_bytes );
-    AYM_Status status = aym_load_inst_from_mem( vm, program, read_bytes );
+    Inst *program     = aym_bytecode_to_inst( buffer, size );
+    AYM_Status status = aym_load_inst_from_mem( vm, program, size );
 
+    free( buffer );
     return status;
 }
 
