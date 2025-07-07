@@ -50,6 +50,9 @@ typedef enum
     AYM_ERR_INVALID_FORMAT,
     AYM_ERR_ALLOC_FAILED,
     AYM_ERR_IO,
+    AYM_FILE_ERROR,
+    AYM_WRITE_ERROR,
+    AYM_INVALID_ARGUMENT,
 } AYM_Status;
 
 typedef enum

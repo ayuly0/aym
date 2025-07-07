@@ -32,6 +32,9 @@ char *aym_status_as_cstr( AYM_Status status )
     case AYM_ERR_INVALID_FORMAT   : return "AYM_ERR_INVALID_FORMAT";
     case AYM_ERR_ALLOC_FAILED     : return "AYM_ERR_ALLOC_FAILED";
     case AYM_ERR_IO               : return "AYM_ERR_IO";
+    case AYM_FILE_ERROR           : return "AYM_FILE_ERROR";
+    case AYM_WRITE_ERROR          : return "AYM_WRITE_ERROR";
+    case AYM_INVALID_ARGUMENT     : return "AYM_INVALID_ARGUMENT";
     default                       : return "UNKNOWN_AYM_STATUS";
     }
 }
