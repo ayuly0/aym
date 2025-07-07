@@ -6,6 +6,10 @@
 
 typedef struct AYM_t AYM;
 
+typedef enum
+{
+} AYM_Header;
+
 AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size );
 
 AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path );

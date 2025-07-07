@@ -10,6 +10,7 @@
 #include "inst.h"
 #include "operand.h"
 #include "syscall.h"
+#include "util.h"
 
 typedef struct AYM_t
 {
@@ -23,10 +24,6 @@ typedef struct AYM_t
 
     bool halt;
 } AYM;
-
-char *err_as_cstr( Err err );
-
-char *aym_status_as_cstr( AYM_Status status );
 
 void aym_init( AYM *vm );
 

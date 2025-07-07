@@ -59,10 +59,6 @@ typedef enum
     AYM_INVALID_ARGUMENT,
 } AYM_Status;
 
-/*typedef enum*/
-/*{*/
-/*} AYM_Header;*/
-
 typedef enum
 {
     INST_NOP = 0x00,
