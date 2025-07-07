@@ -40,7 +40,7 @@ typedef enum
 
 typedef enum
 {
-    AYM_SUCCESS = 0,
+    AYM_OK = 0,
     AYM_ERR_NULL_VM,
     AYM_ERR_NULL_PROGRAM,
     AYM_ERR_PROGRAM_TOO_LARGE,

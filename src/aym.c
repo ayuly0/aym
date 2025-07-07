@@ -22,7 +22,7 @@ char *aym_status_as_cstr( AYM_Status status )
 {
     switch ( status )
     {
-    case AYM_SUCCESS              : return "AYM_SUCCESS";
+    case AYM_OK                   : return "AYM_OK";
     case AYM_ERR_NULL_VM          : return "AYM_ERR_NULL_VM";
     case AYM_ERR_NULL_PROGRAM     : return "AYM_ERR_NULL_PROGRAM";
     case AYM_ERR_PROGRAM_TOO_LARGE: return "AYM_ERR_PROGRAM_TOO_LARGE";
@@ -594,7 +594,7 @@ AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
     vm->program_size = program_size;
     memcpy( vm->program, program, sizeof( Inst ) * program_size );
 
-    return AYM_SUCCESS;
+    return AYM_OK;
 }
 
 AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path )
