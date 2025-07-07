@@ -1,5 +1,6 @@
 #include "aym.h"
 #include "make_inst.h"
+#include "serialize.h"
 
 int main( int argc, char **argv )
 {
@@ -30,6 +31,8 @@ int main( int argc, char **argv )
     {
         printf( "0x%02X ", bytecode[ i ] );
     }
+
+    aym_write_bytecode_to_file( bytecode, "loop.aym", out_size );
 
     Inst *program_from_bytecode = aym_bytecode_to_inst( bytecode, out_size );
     aym_load_inst_from_mem( &vm, program_from_bytecode, prog_size );
