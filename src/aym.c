@@ -638,6 +638,32 @@ AYM_Status aym_load_bytecode_from_file( AYM *vm, char *file_path )
     return status;
 }
 
+AYM_Status aym_write_bytecode_to_file( u8 *bytecode, char *file_path )
+{
+    if ( !bytecode || !file_path )
+    {
+        return AYM_INVALID_ARGUMENT;
+    }
+
+    FILE *fp = fopen( file_path, "wb" );
+    if ( !fp )
+    {
+        return AYM_FILE_ERROR;
+    }
+
+    u32 bytecode_size = *( u32 * )bytecode;
+
+    size_t written = fwrite( bytecode, 1, bytecode_size, fp );
+    fclose( fp );
+
+    if ( written != bytecode_size )
+    {
+        return AYM_WRITE_ERROR;
+    }
+
+    return AYM_OK;
+}
+
 Inst *aym_bytecode_to_inst( u8 *bytecode, size_t bytecode_size )
 {
     assert( bytecode || bytecode_size >= 2 && "bytecode is NULL or small than 2 bytes" );
