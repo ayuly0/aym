@@ -9,6 +9,7 @@ typedef enum
 {
     SYSCALL_EXIT = 0,
     SYSCALL_WRITE,
+    SYSCALL_READ,
 } VmSyscall;
 
 Err invoke_syscall( AYM *vm );
