@@ -78,6 +78,12 @@ typedef enum
     INST_SUB,
     INST_DIV,
     INST_MUL,
+    INST_MOD,
+    INST_SHL,
+    INST_SHR,
+    INST_ROL,
+    INST_ROR,
+    INST_BSWAP,
     INST_POP,
 
     INST_MOV,

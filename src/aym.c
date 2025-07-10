@@ -1,4 +1,5 @@
 #include "aym.h"
+#include "defs.h"
 #include <assert.h>
 
 void aym_init( AYM *vm )
@@ -188,6 +189,153 @@ Err aym_execute_inst( AYM *vm )
 
         vm->registers[ REG_ESP ].as_u64++;
         vm->registers[ REG_IP ].as_u64++;
+        break;
+
+    case INST_MOD:
+        if ( inst.dst.reg != 0 )
+        {
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                vm->registers[ inst.dst.reg ].as_i64 %= aym_reslove_operand( vm, inst.src ).as_i64;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
+        }
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 %
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
+
+    case INST_SHL:
+        if ( inst.dst.reg != 0 )
+        {
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                vm->registers[ inst.dst.reg ].as_i64 <<= aym_reslove_operand( vm, inst.src ).as_i64;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
+        }
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64
+                << vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
+
+    case INST_SHR:
+        if ( inst.dst.reg != 0 )
+        {
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                vm->registers[ inst.dst.reg ].as_i64 >>= aym_reslove_operand( vm, inst.src ).as_i64;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
+        }
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 =
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 2 ].as_i64 >>
+                vm->stack[ vm->registers[ REG_ESP ].as_u64 - 1 ].as_i64;
+            vm->registers[ REG_ESP ].as_u64--;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
+
+    case INST_ROL:
+        if ( inst.dst.reg != 0 )
+        {
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                u64 count                          = aym_reslove_operand( vm, inst.src ).as_u64;
+                u64 value                          = aym_reslove_operand( vm, inst.dst ).as_u64;
+                count                             %= 64;
+                u64 res                            = ( value << count ) | ( value >> ( 64 - count ) );
+                vm->registers[ REG_FLAGS ].as_u64 |= FLAG_CARRY;
+                vm->registers[ REG_0 ].as_u64      = res;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
+        }
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            u64 count                          = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
+            u64 value                          = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
+            count                             %= 64;
+            u64 result                         = ( value << count ) | ( value >> ( 64 - count ) );
+            vm->registers[ REG_FLAGS ].as_u64  = ( value >> ( 64 - count ) ) & 1;
+            vm->stack[ vm->registers[ REG_FLAGS ].as_u64++ ].as_u64 = result;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
+
+    case INST_ROR:
+        if ( inst.dst.reg != 0 )
+        {
+            if ( inst.dst.type == OPERAND_REGISTER )
+            {
+                u64 count                          = aym_reslove_operand( vm, inst.src ).as_u64;
+                u64 value                          = aym_reslove_operand( vm, inst.dst ).as_u64;
+                count                             %= 64;
+                u64 res                            = ( value >> count ) | ( value << ( 64 - count ) );
+                vm->registers[ REG_FLAGS ].as_u64 |= FLAG_CARRY;
+                vm->registers[ REG_0 ].as_u64      = res;
+            }
+            else
+            {
+                return ERR_ILLEGAL_OPERAND_TYPE;
+            }
+        }
+        else
+        {
+            if ( vm->registers[ REG_ESP ].as_u64 < 2 )
+            {
+                return ERR_STACK_UNDERFLOW;
+            }
+            u64 count                          = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
+            u64 value                          = vm->stack[ --vm->registers[ REG_ESP ].as_u64 ].as_u64;
+            count                             %= 64;
+            u64 result                         = ( value >> count ) | ( value << ( 64 - count ) );
+            vm->registers[ REG_FLAGS ].as_u64  = ( value >> ( 64 - count ) ) & 1;
+            vm->stack[ vm->registers[ REG_FLAGS ].as_u64++ ].as_u64 = result;
+        }
+        vm->registers[ REG_IP ].as_u64++;
+        break;
+
+    case INST_BSWAP:
         break;
 
         // Registers Inst

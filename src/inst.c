@@ -44,6 +44,12 @@ char *inst_as_cstr( InstType inst_type )
 
     case INST_SYSCALL: return "INST_SYSCALL";
     case INST_HALT   : return "INST_HALT";
+    case INST_MOD    : return "INST_MOD";
+    case INST_SHL    : return "INST_SHL";
+    case INST_SHR    : return "INST_SHR";
+    case INST_ROL    : return "INST_ROL";
+    case INST_ROR    : return "INST_ROR";
+    case INST_BSWAP  : return "INST_BSWAP";
     default          : return "UNKOWN_INST";
     }
 }
