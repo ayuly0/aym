@@ -10,6 +10,7 @@ typedef struct
         int reg;
         Word imm;
         int mem_addr;
+        char *label_name;
     };
 } Operand;
 

@@ -30,11 +30,15 @@
         INST_CMP, dst_operand_type, dst_value_type, dst_value, src_operand_type, src_value_type, src_value             \
     )
 
+#define MAKE_JMP( operand_type, value_type, value )                                                                    \
+    MAKE_INST_TEMPLATE( INST_JMP, operand_type, value_type, value, 0, imm, 0 )
 #define MAKE_JNE( operand_type, value_type, value )                                                                    \
     MAKE_INST_TEMPLATE( INST_JNE, operand_type, value_type, value, 0, imm, 0 )
 #define MAKE_CALL( operand_type, value_type, value )                                                                   \
     MAKE_INST_TEMPLATE( INST_CALL, operand_type, value_type, value, 0, imm, 0 )
 #define MAKE_RET { INST_RET }
+
+#define MAKE_LABEL( name ) MAKE_INST_TEMPLATE( INST_LABEL, OPERAND_LABEL, label_name, name, 0, imm, 0 )
 
 #define MAKE_SYSCALL { INST_SYSCALL }
 #define MAKE_HALT    { INST_HALT }

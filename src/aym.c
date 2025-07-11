@@ -1,14 +1,29 @@
 #include "aym.h"
 #include "defs.h"
+#include "label.h"
 #include <assert.h>
 
 void aym_init( AYM *vm )
 {
-    vm->halt = false;
+    vm->halt        = false;
+    vm->label_table = NULL;
 
     memset( vm->stack, 0, AYM_MAX_STACK_SIZE );
     memset( vm->memory, 0, AYM_MAX_MEMORY_SIZE );
     memset( vm->program, 0, AYM_MAX_PROGRAM_SIZE );
+}
+
+void aym_bind_label( AYM *vm )
+{
+    for ( u64 i = 0; i < vm->program_size; ++i )
+    {
+        Inst inst = vm->program[ i ];
+        if ( inst.type == INST_LABEL )
+        {
+            bind_label( &vm->label_table, inst.dst.label_name, i );
+            printf( "Bind Label: name: %s, addr: 0x%02X\n", inst.dst.label_name, i );
+        }
+    }
 }
 
 Err aym_execute_inst( AYM *vm )
@@ -580,6 +595,8 @@ Err aym_execute_inst( AYM *vm )
 
         break;
 
+    case INST_LABEL: vm->registers[ REG_IP ].as_u64++; break; // do nothing
+
     case INST_SYSCALL:
         if ( invoke_syscall( vm ) != ERR_OK )
         {
@@ -618,6 +635,11 @@ Word aym_reslove_operand( AYM *vm, Operand operand )
     else if ( operand.type == OPERAND_REGISTER )
     {
         return vm->registers[ operand.reg ];
+    }
+    else if ( operand.type = OPERAND_LABEL )
+    {
+        u64 index = get_label_index( &vm->label_table, operand.label_name );
+        return ( Word ){ .as_u64 = index };
     }
     else
     {

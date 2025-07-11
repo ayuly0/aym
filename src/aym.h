@@ -8,6 +8,7 @@
 
 #include "defs.h"
 #include "inst.h"
+#include "label.h"
 #include "operand.h"
 #include "syscall.h"
 #include "util.h"
@@ -21,11 +22,14 @@ typedef struct AYM_t
 
     Word registers[ REG_COUNT ];
     Word memory[ AYM_MAX_MEMORY_SIZE ];
+    LabelEntry *label_table;
 
     bool halt;
 } AYM;
 
 void aym_init( AYM *vm );
+
+void aym_bind_label( AYM *vm );
 
 Err aym_execute_inst( AYM *vm );
 

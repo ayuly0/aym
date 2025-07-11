@@ -27,20 +27,21 @@ char *inst_as_cstr( InstType inst_type )
     case INST_LOAD : return "INST_LOAD";
     case INST_STORE: return "INST_STORE";
 
-    case INST_JMP : return "INST_JMP";
-    case INST_JE  : return "INST_JE";
-    case INST_JNE : return "INST_JNE";
-    case INST_JG  : return "INST_JG";
-    case INST_JL  : return "INST_JL";
-    case INST_JGE : return "INST_JGE";
-    case INST_JLE : return "INST_JLE";
-    case INST_JA  : return "INST_JA";
-    case INST_JB  : return "INST_JB";
-    case INST_JAE : return "INST_JAE";
-    case INST_JBE : return "INST_JBE";
-    case INST_INC : return "INST_INC";
-    case INST_CALL: return "INST_CALL";
-    case INST_RET : return "INST_RET";
+    case INST_JMP  : return "INST_JMP";
+    case INST_JE   : return "INST_JE";
+    case INST_JNE  : return "INST_JNE";
+    case INST_JG   : return "INST_JG";
+    case INST_JL   : return "INST_JL";
+    case INST_JGE  : return "INST_JGE";
+    case INST_JLE  : return "INST_JLE";
+    case INST_JA   : return "INST_JA";
+    case INST_JB   : return "INST_JB";
+    case INST_JAE  : return "INST_JAE";
+    case INST_JBE  : return "INST_JBE";
+    case INST_INC  : return "INST_INC";
+    case INST_CALL : return "INST_CALL";
+    case INST_RET  : return "INST_RET";
+    case INST_LABEL: return "INST_LABEL";
 
     case INST_SYSCALL: return "INST_SYSCALL";
     case INST_HALT   : return "INST_HALT";

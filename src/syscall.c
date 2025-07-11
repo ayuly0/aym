@@ -14,16 +14,16 @@ Err invoke_syscall( AYM *vm )
         break;
     }
     case SYSCALL_WRITE: {
-        u64 len   = vm->registers[ REG_3 ].as_u64;
-        void *buf = vm->registers[ REG_2 ].as_ptr;
         u64 fd    = vm->registers[ REG_1 ].as_u64;
+        void *buf = vm->registers[ REG_2 ].as_ptr;
+        u64 len   = vm->registers[ REG_3 ].as_u64;
         write( ( int )fd, buf, len );
         break;
     }
     case SYSCALL_READ: {
-        u64 len   = vm->registers[ REG_3 ].as_u64;
-        void *buf = vm->registers[ REG_2 ].as_ptr;
         u64 fd    = vm->registers[ REG_1 ].as_u64;
+        void *buf = vm->registers[ REG_2 ].as_ptr;
+        u64 len   = vm->registers[ REG_3 ].as_u64;
         read( ( int )fd, buf, len );
         break;
     }

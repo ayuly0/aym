@@ -112,6 +112,7 @@ typedef enum
     INST_INC,
     INST_CALL,
     INST_RET,
+    INST_LABEL,
 
     INST_SYSCALL,
     INST_HALT,
@@ -142,7 +143,8 @@ typedef enum
     OPERAND_NONE = 0,
     OPERAND_IMMEDIATE,
     OPERAND_REGISTER,
-    OPERAND_MEMORY
+    OPERAND_MEMORY,
+    OPERAND_LABEL,
 } OperandType;
 
 #endif // !DEFS_H_
