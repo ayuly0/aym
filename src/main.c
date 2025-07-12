@@ -30,20 +30,20 @@ int main( int argc, char **argv )
     };
 
     size_t prog_size = sizeof( pg ) / sizeof( pg[ 0 ] );
-    // size_t out_size  = 0;
-    // u8 *bytecode     = aym_inst_to_bytecode( pg, prog_size, &out_size );
-    //
-    // for ( int i = 0; i < out_size; ++i )
-    // {
-    //     printf( "0x%02X ", bytecode[ i ] );
-    // }
-    //
-    // aym_write_bytecode_to_file( bytecode, "loop.aym", out_size );
-    // aym_load_bytecode_from_file( &vm, "loop.aym", bytecode, &out_size );
+    size_t out_size  = 0;
+    u8 *bytecode     = aym_inst_to_bytecode( pg, prog_size, &out_size );
 
-    // Inst *program_from_bytecode = aym_bytecode_to_inst( bytecode, out_size );
-    // aym_load_inst_from_mem( &vm, program_from_bytecode, prog_size );
-    aym_load_inst_from_mem( &vm, pg, prog_size );
+    for ( int i = 0; i < out_size; ++i )
+    {
+        printf( "0x%02X ", bytecode[ i ] );
+    }
+
+    aym_write_bytecode_to_file( bytecode, "loop.aym", out_size );
+    aym_load_bytecode_from_file( &vm, "loop.aym", bytecode, &out_size );
+
+    Inst *program_from_bytecode = aym_bytecode_to_inst( bytecode, out_size );
+    aym_load_inst_from_mem( &vm, program_from_bytecode, prog_size );
+    // aym_load_inst_from_mem( &vm, pg, prog_size );
 
     aym_bind_label( &vm );
 

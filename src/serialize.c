@@ -1,10 +1,12 @@
 #include <assert.h>
+#include <cstddef>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "aym.h"
+#include "label.h"
 #include "serialize.h"
 
 u32 compute_checksum( const u8 *data, size_t len )
@@ -15,6 +17,42 @@ u32 compute_checksum( const u8 *data, size_t len )
         sum += data[ i ];
     }
     return sum;
+}
+
+void aym_bind_labels( Inst *program, size_t program_size, LabelEntry *label_table )
+{
+    for ( u64 i = 0; i < program_size; ++i )
+    {
+        Inst inst = program[ i ];
+        if ( inst.type == INST_LABEL )
+        {
+            bind_label( &label_table, inst.dst.label_name, i );
+            printf( "Bind Label: name: %s, addr: 0x%02X\n", inst.dst.label_name, i );
+        }
+    }
+}
+
+void aym_resolve_labels( Inst *program, size_t program_size, LabelEntry *label_table )
+{
+    for ( size_t i = 0; i < program_size; ++i )
+    {
+        Inst *inst = &program[ i ];
+        if ( inst->dst.type == OPERAND_LABEL && inst->dst.label_name )
+        {
+            u64 index = get_label_index( &label_table, inst->dst.label_name );
+            if ( index != ( u64 )-1 )
+            {
+                inst->dst.type       = OPERAND_IMMEDIATE;
+                inst->dst.imm.as_u64 = index;
+                free( inst->dst.label_name );
+                inst->dst.label_name = NULL;
+            }
+            else
+            {
+                fprintf( stderr, "Error: unresolved label '%s' in instruction %zu\n", inst->dst.label_name, i );
+            }
+        }
+    }
 }
 
 AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size )
@@ -197,12 +235,16 @@ u8 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size )
 
     size_t max_words = program_size * 6;
     u8 *bytecode     = malloc( sizeof( u8 ) * max_words );
+    LabelEntry label_table;
 
     assert( bytecode && "bytecode is NULL" );
     if ( !bytecode )
     {
         return NULL;
     }
+
+    aym_bind_labels( program, program_size, &label_table );
+    aym_resolve_labels( program, program_size, &label_table );
 
     size_t offset = 0;
     for ( size_t i = 0; i < program_size; ++i )
