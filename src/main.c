@@ -45,7 +45,7 @@ int main( int argc, char **argv )
     aym_load_inst_from_mem( &vm, program_from_bytecode, prog_size );
     // aym_load_inst_from_mem( &vm, pg, prog_size );
 
-    aym_bind_label( &vm );
+    // aym_bind_label( &vm );
 
     Err err = aym_execute_program( &vm );
     if ( err != ERR_OK )

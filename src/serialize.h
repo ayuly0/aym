@@ -1,8 +1,6 @@
 #ifndef SERIALIZE_H_
 #define SERIALIZE_H_
 
-#include <cstddef>
-
 #include "defs.h"
 #include "inst.h"
 #include "label.h"
@@ -20,9 +18,9 @@ typedef struct
 
 u32 compute_checksum( const u8 *data, size_t len );
 
-void aym_bind_labels( Inst *program, size_t program_size, LabelEntry *label_table );
+void aym_bind_labels( Inst *program, size_t program_size, LabelEntry **label_table );
 
-void aym_resolve_labels( Inst *program, size_t program_size, LabelEntry *label_table );
+void aym_resolve_labels( Inst *program, size_t program_size, LabelEntry **label_table );
 
 AYM_Status aym_load_inst_from_mem( AYM *vm, Inst *program, size_t program_size );
 
