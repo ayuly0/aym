@@ -21,7 +21,7 @@ typedef union {
     void *as_ptr;
 } Word;
 
-#define AYM_MAGIC   0x004D4159
+#define AYM_MAGIC   0x004D5941
 #define AYM_VERSION 1
 
 #define AYM_MAX_STACK_SIZE   1024 * 1024 // 1MB
