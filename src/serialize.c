@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "aym.h"
+#include "defs.h"
 #include "label.h"
 #include "serialize.h"
 
@@ -42,8 +43,7 @@ void aym_resolve_labels( Inst *program, size_t program_size, LabelEntry **label_
             if ( index != ( u64 )-1 )
             {
                 inst->dst.type       = OPERAND_IMMEDIATE;
-                inst->dst.imm.as_u64 = index;
-                free( inst->dst.label_name );
+                inst->dst.imm        = ( Word ){ .as_u64 = index };
                 inst->dst.label_name = NULL;
             }
             else
@@ -244,7 +244,7 @@ u8 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size )
     }
 
     aym_bind_labels( program, program_size, &label_table );
-    aym_resolve_labels( program, program_size, &label_table );
+    // aym_resolve_labels( program, program_size, &label_table );
 
     size_t offset = 0;
     for ( size_t i = 0; i < program_size; ++i )
@@ -269,16 +269,37 @@ u8 *aym_inst_to_bytecode( Inst *program, size_t program_size, size_t *out_size )
         bytecode[ offset++ ] = operand_count;
         if ( inst->dst.type != OPERAND_NONE )
         {
-            printf( "  Dst Operand: %d, Value: %d\n", inst->dst.type, operand_as_u8( inst->dst ) );
+            if ( inst->dst.type == OPERAND_LABEL && inst->dst.label_name )
+            {
+                u64 index = get_label_index( &label_table, inst->dst.label_name );
+                if ( index != ( u64 )-1 )
+                {
+                    inst->dst.type       = OPERAND_IMMEDIATE;
+                    inst->dst.imm.as_u64 = index;
+                }
+                else
+                {
+                    fprintf( stderr, "Error: unresolved label '%s' in instruction 0x%02X\n", inst->dst.label_name, i );
+                    _exit( 1 );
+                }
+            }
+
             bytecode[ offset++ ] = inst->dst.type;
             bytecode[ offset++ ] = operand_as_u8( inst->dst );
+
+            printf(
+                "  Dst Operand: %s, Value: %d\n", operand_type_as_cstr( inst->dst.type ), operand_as_u8( inst->dst )
+            );
         }
 
         if ( inst->src.type != OPERAND_NONE )
         {
-            printf( "  Src Operand: %d, Value: %d\n", inst->src.type, operand_as_u8( inst->src ) );
             bytecode[ offset++ ] = inst->src.type;
             bytecode[ offset++ ] = operand_as_u8( inst->src );
+
+            printf(
+                "  Src Operand: %s, Value: %d\n", operand_type_as_cstr( inst->src.type ), operand_as_u8( inst->src )
+            );
         }
     }
 

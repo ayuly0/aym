@@ -1,4 +1,5 @@
 #include "util.h"
+#include "defs.h"
 
 char *err_as_cstr( Err err )
 {
@@ -36,5 +37,18 @@ char *aym_status_as_cstr( AYM_Status status )
     case AYM_BAD_HEADER           : return "AYM_BAD_HEADER";
     case AYM_CHECKSUM_MISMATCH    : return "AYM_CHECKSUM_MISMATCH";
     default                       : return "UNKNOWN_AYM_STATUS";
+    }
+}
+
+char *operand_type_as_cstr( OperandType op_type )
+{
+    switch ( op_type )
+    {
+    case OPERAND_IMMEDIATE: return "OPERAND_IMMEDIATE";
+    case OPERAND_REGISTER : return "OPERAND_REGISTER";
+    case OPERAND_MEMORY   : return "OPERAND_MEMORY";
+    case OPERAND_LABEL    : return "OPERAND_LABEL";
+    case OPERAND_NONE     : return "OPERAND_NONE";
+    default               : return "Unreachable!";
     }
 }
